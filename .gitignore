@@ -1,0 +1,12 @@
+.idea/
+
+build/
+out/
+
+.gradle/
+
+data/test/tmp/
+data/test/output/
+
+*/data/test/tmp/
+*/data/test/output/
