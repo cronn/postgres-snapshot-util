@@ -12,13 +12,14 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.testcontainers.containers.PostgreSQLContainer;
 
 class PostgresRestoreTest extends BaseTest {
 
 	@BeforeAll
 	static void startPostgresContainer() {
 		postgresContainer.start();
-		jdbcUrl = getJdbcUrl(postgresContainer);
+		jdbcUrl = postgresContainer.getJdbcUrl();
 	}
 
 	@AfterAll
@@ -33,16 +34,24 @@ class PostgresRestoreTest extends BaseTest {
 
 	@Test
 	void testDumpAndRestore(@TempDir Path tempDir) {
-		String dumpBefore = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD);
+		String dumpPrimaryPostgres = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD);
 
 		Path dumpFile = tempDir.resolve("dump.tar");
 		PostgresDump.dumpToFile(dumpFile, jdbcUrl, USERNAME, PASSWORD, PostgresDumpFormat.CUSTOM);
 
-		PostgresRestore.restoreFromFile(dumpFile, jdbcUrl, USERNAME, PASSWORD,
-			PostgresRestoreOption.CLEAN,
-			PostgresRestoreOption.SINGLE_TRANSACTION);
+		try (PostgreSQLContainer<?> otherPostgres = createPostgresContainer()) {
+			otherPostgres.start();
+			String otherPostgresJdbcUrl = otherPostgres.getJdbcUrl();
 
-		String dumpAfter = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD);
-		assertThat(dumpAfter).isEqualTo(dumpBefore);
+			String dumpOtherPostgresBeforeRestore = PostgresDump.dumpToString(otherPostgresJdbcUrl, USERNAME, PASSWORD);
+			assertThat(dumpOtherPostgresBeforeRestore).isNotEqualTo(dumpPrimaryPostgres);
+
+			PostgresRestore.restoreFromFile(dumpFile, otherPostgresJdbcUrl, USERNAME, PASSWORD,
+				PostgresRestoreOption.SINGLE_TRANSACTION,
+				PostgresRestoreOption.EXIT_ON_ERROR);
+
+			String dumpOtherPostgres = PostgresDump.dumpToString(otherPostgresJdbcUrl, USERNAME, PASSWORD);
+			assertThat(dumpOtherPostgres).isEqualTo(dumpPrimaryPostgres);
+		}
 	}
 }

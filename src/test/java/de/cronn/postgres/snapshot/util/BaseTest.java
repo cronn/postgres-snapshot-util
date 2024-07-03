@@ -58,7 +58,7 @@ abstract class BaseTest {
 
 	private ValidationFileAssertions validationFileAssertions;
 
-	private static PostgreSQLContainer<?> createPostgresContainer() {
+	protected static PostgreSQLContainer<?> createPostgresContainer() {
 		return createPostgresContainer(POSTGRES_DOCKER_IMAGE);
 	}
 
@@ -99,10 +99,6 @@ abstract class BaseTest {
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	protected static String getJdbcUrl(PostgreSQLContainer<?> postgresContainer) {
-		return "jdbc:postgresql://%s:%d/test-db".formatted(postgresContainer.getHost(), postgresContainer.getFirstMappedPort());
 	}
 
 	@BeforeEach

@@ -24,7 +24,7 @@ class PostgresDumpTest extends BaseTest {
 		@BeforeAll
 		static void startPostgresContainer() {
 			postgresContainer.start();
-			jdbcUrl = getJdbcUrl(postgresContainer);
+			jdbcUrl = postgresContainer.getJdbcUrl();
 		}
 
 		@AfterAll
@@ -61,7 +61,7 @@ class PostgresDumpTest extends BaseTest {
 		@BeforeAll
 		static void startPostgresContainer() {
 			postgresContainer.start();
-			jdbcUrl = getJdbcUrl(postgresContainer);
+			jdbcUrl = postgresContainer.getJdbcUrl();
 		}
 
 		@AfterAll
@@ -125,7 +125,7 @@ class PostgresDumpTest extends BaseTest {
 	void testOtherPostgresVersion() throws Exception {
 		try (PostgreSQLContainer<?> otherPostgresContainer = createPostgresContainer(DockerImageName.parse("postgres:14.12"))) {
 			otherPostgresContainer.start();
-			String jdbcUrl = getJdbcUrl(otherPostgresContainer);
+			String jdbcUrl = otherPostgresContainer.getJdbcUrl();
 
 			String schema = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD, PostgresDumpOption.SCHEMA_ONLY);
 			compareActualWithValidationFile(schema);
