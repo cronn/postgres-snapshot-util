@@ -1,0 +1,34 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 16.1 (Debian 16.1-1.pgdg120+1)
+-- Dumped by pg_dump version 16.1 (Debian 16.1-1.pgdg120+1)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Data for Name: employees; Type: TABLE DATA; Schema: public; Owner: test-user
+--
+
+COPY public.employees (id, first_name, last_name, email, hire_date, salary) FROM stdin;
+1	John	Doe	john.doe@example.com	2022-01-15	60000.00
+2	Jane	Smith	jane.smith@example.com	2023-03-22	75000.00
+3	Emily	Johnson	emily.johnson@example.com	2021-05-10	50000.00
+4	Michael	Brown	michael.brown@example.com	2020-08-30	80000.00
+5	Sarah	Davis	sarah.davis@example.com	2024-06-01	70000.00
+\.
+
+
+--
+-- PostgreSQL database dump complete
+--
