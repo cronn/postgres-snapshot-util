@@ -13,6 +13,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 class PostgresDumpTest extends BaseTest {
 
@@ -22,7 +24,7 @@ class PostgresDumpTest extends BaseTest {
 		@BeforeAll
 		static void startPostgresContainer() {
 			postgresContainer.start();
-			jdbcUrl = "jdbc:postgresql://localhost:%d/test-db".formatted(postgresContainer.getFirstMappedPort());
+			jdbcUrl = getJdbcUrl(postgresContainer);
 		}
 
 		@AfterAll
@@ -59,7 +61,7 @@ class PostgresDumpTest extends BaseTest {
 		@BeforeAll
 		static void startPostgresContainer() {
 			postgresContainer.start();
-			jdbcUrl = "jdbc:postgresql://localhost:%d/test-db".formatted(postgresContainer.getFirstMappedPort());
+			jdbcUrl = getJdbcUrl(postgresContainer);
 		}
 
 		@AfterAll
@@ -119,4 +121,14 @@ class PostgresDumpTest extends BaseTest {
 		}
 	}
 
+	@Test
+	void testOtherPostgresVersion() throws Exception {
+		try (PostgreSQLContainer<?> otherPostgresContainer = createPostgresContainer(DockerImageName.parse("postgres:14.12"))) {
+			otherPostgresContainer.start();
+			String jdbcUrl = getJdbcUrl(otherPostgresContainer);
+
+			String schema = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD, PostgresDumpOption.SCHEMA_ONLY);
+			compareActualWithValidationFile(schema);
+		}
+	}
 }

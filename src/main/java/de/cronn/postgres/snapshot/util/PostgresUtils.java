@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -13,8 +14,8 @@ import org.apache.commons.lang3.SystemUtils;
 import org.testcontainers.containers.GenericContainer;
 
 final class PostgresUtils {
-	static GenericContainer<?> createPostgresContainer() {
-		GenericContainer<?> container = new GenericContainer<>(PostgresConstants.POSTGRES_DOCKER_IMAGE);
+	static GenericContainer<?> createPostgresContainer(String postgresVersion) {
+		GenericContainer<?> container = new GenericContainer<>("postgres:" + postgresVersion);
 
 		if (SystemUtils.IS_OS_LINUX) {
 			container.withExtraHost(PostgresConstants.DOCKER_HOST_INTERNAL, PostgresConstants.HOST_GATEWAY);
@@ -27,19 +28,17 @@ final class PostgresUtils {
 		URI databaseUri = toUri(jdbcUrl);
 
 		int port = databaseUri.getPort();
-		String databaseName = getDatabaseName(jdbcUrl, username, password);
 		String host = resolveHost(databaseUri.getHost());
 
-		return new ConnectionInformation(host, port, databaseName, username, password);
-	}
-
-	private static String getDatabaseName(String jdbcUrl, String username, String password) {
 		Properties connectionProperties = new Properties();
 		connectionProperties.put("user", username);
 		connectionProperties.put("password", password);
 
 		try (Connection connection = DriverManager.getConnection(jdbcUrl, connectionProperties)) {
-			return connection.getCatalog();
+			DatabaseMetaData metaData = connection.getMetaData();
+			String postgresVersion = "%d.%d".formatted(metaData.getDatabaseMajorVersion(), metaData.getDatabaseMinorVersion());
+			String databaseName = connection.getCatalog();
+			return new ConnectionInformation(postgresVersion, host, port, databaseName, username, password);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}

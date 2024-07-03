@@ -79,7 +79,7 @@ public final class PostgresDump {
 
 		log.debug("Executing {}", String.join(" ", command));
 
-		return PostgresUtils.createPostgresContainer()
+		return PostgresUtils.createPostgresContainer(connectionInformation.postgresVersion())
 			.withEnv(PostgresConstants.PG_PASSWORD_ENVIRONMENT_VARIABLE, connectionInformation.password())
 			.withStartupCheckStrategy(new OneShotStartupCheckStrategy())
 			.withCommand(command);

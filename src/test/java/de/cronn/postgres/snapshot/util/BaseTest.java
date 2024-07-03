@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import de.cronn.assertions.validationfile.FileExtension;
 import de.cronn.assertions.validationfile.FileExtensions;
@@ -25,7 +26,10 @@ import de.cronn.assertions.validationfile.ValidationFileAssertions;
 import de.cronn.testutils.ThreadLeakCheck;
 
 @ThreadLeakCheck.AllowedThreads(
-	prefixes = "ducttape-",
+	prefixes = {
+		"ducttape-",
+		"testcontainers-pull-watchdog-",
+	},
 	names = {
 		"process reaper",
 		"Attach Listener",
@@ -40,11 +44,13 @@ import de.cronn.testutils.ThreadLeakCheck;
 })
 abstract class BaseTest {
 
+	private static final DockerImageName POSTGRES_DOCKER_IMAGE = DockerImageName.parse("postgres:16.1");
+
+	private static final String DATABASE_NAME = "test-db";
 	protected static final String USERNAME = "test-user";
 	protected static final String PASSWORD = "test-password";
 
-	static final PostgreSQLContainer<?> postgresContainer = BaseTest.createPostgresContainer();
-	private static final String DATABASE_NAME = "test-db";
+	static final PostgreSQLContainer<?> postgresContainer = createPostgresContainer();
 	static String jdbcUrl;
 
 	@InjectSoftAssertions
@@ -53,7 +59,11 @@ abstract class BaseTest {
 	private ValidationFileAssertions validationFileAssertions;
 
 	private static PostgreSQLContainer<?> createPostgresContainer() {
-		return new PostgreSQLContainer<>(PostgresConstants.POSTGRES_DOCKER_IMAGE)
+		return createPostgresContainer(POSTGRES_DOCKER_IMAGE);
+	}
+
+	protected static PostgreSQLContainer<?> createPostgresContainer(DockerImageName postgresDockerImage) {
+		return new PostgreSQLContainer<>(postgresDockerImage)
 			.withDatabaseName(DATABASE_NAME)
 			.withUsername(USERNAME)
 			.withPassword(PASSWORD)
@@ -91,6 +101,10 @@ abstract class BaseTest {
 		}
 	}
 
+	protected static String getJdbcUrl(PostgreSQLContainer<?> postgresContainer) {
+		return "jdbc:postgresql://%s:%d/test-db".formatted(postgresContainer.getHost(), postgresContainer.getFirstMappedPort());
+	}
+
 	@BeforeEach
 	void prepareValidationFileAssertions(TestInfo testInfo) {
 		validationFileAssertions = new SoftValidationFileAssertions(testInfo);
@@ -104,7 +118,7 @@ abstract class BaseTest {
 		compareActualWithValidationFile(actual, suffix, FileExtensions.TXT);
 	}
 
-	protected void compareActualWithValidationFile(String actual, String suffix, FileExtension fileExtension) throws Exception {
+	protected void compareActualWithValidationFile(String actual, String suffix, FileExtension fileExtension) {
 		validationFileAssertions.assertWithFileWithSuffix(actual, suffix, fileExtension);
 	}
 
