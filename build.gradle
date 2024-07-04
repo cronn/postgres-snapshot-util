@@ -93,7 +93,7 @@ publishing {
             version = project.version
             pom {
                 name = project.name
-                description = 'PostgreSQL Utility Classes'
+                description = 'Snapshot Utilities for PostgreSQL'
                 url = 'https://github.com/cronn/postgres-snapshot-util'
 
                 licenses {
