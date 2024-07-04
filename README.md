@@ -11,6 +11,16 @@ We build on top of [Testcontainers](testcontainers) to spin-up a temporary Docke
 
 ## Usage ##
 
+Add the following Maven dependency to your project:
+
+```xml
+<dependency>
+    <groupId>de.cronn</groupId>
+    <artifactId>postgres-snapshot-util</artifactId>
+    <version>1.0</version>
+</dependency>
+```
+
 ### Simple Schema Dump
 
 ```java
