@@ -118,10 +118,6 @@ abstract class BaseTest {
 		validationFileAssertions.assertWithFileWithSuffix(actual, suffix, fileExtension);
 	}
 
-	protected String getTestName() {
-		return validationFileAssertions.getTestName();
-	}
-
 	private class SoftValidationFileAssertions implements ValidationFileAssertions {
 
 		private final TestInfo testInfo;
