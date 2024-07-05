@@ -75,6 +75,13 @@ wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
 
+jacocoTestReport {
+    reports {
+        xml.required = true
+    }
+    dependsOn test
+}
+
 task sourcesJar(type: Jar, dependsOn: classes) {
     archiveClassifier = 'sources'
     from sourceSets.main.allSource

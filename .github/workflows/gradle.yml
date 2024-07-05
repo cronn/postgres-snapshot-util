@@ -38,8 +38,9 @@ jobs:
       with:
         java-version: 21
     - name: Build with Gradle
-      run: ./gradlew build jacocoTestReport
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
+      run: ./gradlew jacocoTestReport
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4.0.1
       with:
+        token: ${{ secrets.CODECOV_TOKEN }}
         files: ./build/reports/jacoco/test/jacocoTestReport.xml
