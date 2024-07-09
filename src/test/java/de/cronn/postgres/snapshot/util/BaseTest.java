@@ -20,8 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
-import de.cronn.assertions.validationfile.FileExtension;
-import de.cronn.assertions.validationfile.FileExtensions;
 import de.cronn.assertions.validationfile.ValidationFileAssertions;
 import de.cronn.testutils.ThreadLeakCheck;
 
@@ -106,16 +104,8 @@ abstract class BaseTest {
 		validationFileAssertions = new SoftValidationFileAssertions(testInfo);
 	}
 
-	protected void compareActualWithValidationFile(String actual) throws Exception {
-		compareActualWithValidationFile(actual, null);
-	}
-
-	protected void compareActualWithValidationFile(String actual, String suffix) throws Exception {
-		compareActualWithValidationFile(actual, suffix, FileExtensions.TXT);
-	}
-
-	protected void compareActualWithValidationFile(String actual, String suffix, FileExtension fileExtension) {
-		validationFileAssertions.assertWithFileWithSuffix(actual, suffix, fileExtension);
+	protected void compareActualWithValidationFile(String actual) {
+		validationFileAssertions.assertWithFile(actual);
 	}
 
 	private class SoftValidationFileAssertions implements ValidationFileAssertions {
