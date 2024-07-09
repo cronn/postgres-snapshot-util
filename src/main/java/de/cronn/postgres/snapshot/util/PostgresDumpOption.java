@@ -37,7 +37,10 @@ public enum PostgresDumpOption {
 	 * exclude large objects in dump
 	 */
 	NO_LARGE_OBJECTS("--no-large-objects"),
-	;
+	/**
+	 * do not dump privileges (grant/revoke)
+	 */
+	NO_PRIVILEGES("--no-privileges");
 
 	private final String commandArgument;
 

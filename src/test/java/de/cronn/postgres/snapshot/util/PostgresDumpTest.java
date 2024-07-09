@@ -119,6 +119,12 @@ class PostgresDumpTest extends BaseTest {
 				PostgresDumpOption.SCHEMA_ONLY);
 			compareActualWithValidationFile(dump);
 		}
+
+		@Test
+		void testDumpWithoutPrivileges() {
+			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD, PostgresDumpOption.NO_PRIVILEGES);
+			compareActualWithValidationFile(dump);
+		}
 	}
 
 	@Test
