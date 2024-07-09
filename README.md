@@ -43,8 +43,37 @@ PostgresRestore.restoreFromFile(dumpFile, jdbcUrl, "user", "pass",
                                 PostgresRestoreOption.SINGLE_TRANSACTION);
 ```
 
+## Use Cases ##
+
+### Integration / Regression Test ###
+
+`PostgresDump` was designed to be used in a JUnit (regression) tests to dump and compare the actual database Schema
+of an application in cases where the schema is managed by a library/framework such as Liquibase.
+We recommend to use our [validation-file-assertions] library to write such a test.
+
+Full example:
+
+```java
+@SpringBootTest
+@Testcontainers
+class SchemaTest implements JUnit5ValidationFileAssertions {
+
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16.1");
+
+    @Test
+    void schemaExport() {
+        String schema = PostgresDump.dumpToString(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword(),
+            PostgresDumpOption.SCHEMA_ONLY);
+        assertWithFile(schema);
+    }
+}
+```
+
 ## Requirements ##
 
 - Java 17+
 
 [testcontainers]: https://testcontainers.com/
+[validation-file-assertions]: https://github.com/cronn/validation-file-assertions
