@@ -26,6 +26,10 @@ public enum PostgresRestoreOption {
 	 */
 	DATA_ONLY("--data-only"),
 	/**
+	 * restore only the schema, no data
+	 */
+	SCHEMA_ONLY("--schema-only"),
+	/**
 	 * skip restoration of object ownership
 	 */
 	NO_OWNER("--no-owner"),
