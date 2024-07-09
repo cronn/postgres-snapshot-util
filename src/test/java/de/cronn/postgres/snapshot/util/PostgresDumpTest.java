@@ -33,7 +33,7 @@ class PostgresDumpTest extends BaseTest {
 		}
 
 		@Test
-		void testDumpToString() throws Exception {
+		void testDumpToString() {
 			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD);
 			compareActualWithValidationFile(dump);
 		}
@@ -49,7 +49,7 @@ class PostgresDumpTest extends BaseTest {
 		}
 
 		@Test
-		void testSchemaOnly() throws Exception {
+		void testSchemaOnly() {
 			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD, PostgresDumpOption.SCHEMA_ONLY);
 			compareActualWithValidationFile(dump);
 		}
@@ -75,7 +75,7 @@ class PostgresDumpTest extends BaseTest {
 		}
 
 		@Test
-		void testDump() throws Exception {
+		void testDump() {
 			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD);
 			compareActualWithValidationFile(dump);
 		}
@@ -90,19 +90,19 @@ class PostgresDumpTest extends BaseTest {
 		}
 
 		@Test
-		void testSchemaOnly() throws Exception {
+		void testSchemaOnly() {
 			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD, PostgresDumpOption.SCHEMA_ONLY);
 			compareActualWithValidationFile(dump);
 		}
 
 		@Test
-		void testDataOnly() throws Exception {
+		void testDataOnly() {
 			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD, PostgresDumpOption.DATA_ONLY);
 			compareActualWithValidationFile(dump);
 		}
 
 		@Test
-		void testCleanAndCreate() throws Exception {
+		void testCleanAndCreate() {
 			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD,
 				PostgresDumpOption.CLEAN,
 				PostgresDumpOption.CREATE,
@@ -111,7 +111,7 @@ class PostgresDumpTest extends BaseTest {
 		}
 
 		@Test
-		void testCleanAndCreateIfExists() throws Exception {
+		void testCleanAndCreateIfExists() {
 			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD,
 				PostgresDumpOption.CLEAN,
 				PostgresDumpOption.IF_EXISTS,
@@ -122,7 +122,7 @@ class PostgresDumpTest extends BaseTest {
 	}
 
 	@Test
-	void testOtherPostgresVersion() throws Exception {
+	void testOtherPostgresVersion() {
 		try (PostgreSQLContainer<?> otherPostgresContainer = createPostgresContainer(DockerImageName.parse("postgres:14.12"))) {
 			otherPostgresContainer.start();
 			String jdbcUrl = otherPostgresContainer.getJdbcUrl();
