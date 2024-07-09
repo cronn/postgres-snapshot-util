@@ -38,6 +38,10 @@ public enum PostgresDumpOption {
 	 */
 	NO_LARGE_OBJECTS("--no-large-objects"),
 	/**
+	 * skip restoration of object ownership in plain-text format
+	 */
+	NO_OWNER("--no-owner"),
+	/**
 	 * do not dump privileges (grant/revoke)
 	 */
 	NO_PRIVILEGES("--no-privileges");
