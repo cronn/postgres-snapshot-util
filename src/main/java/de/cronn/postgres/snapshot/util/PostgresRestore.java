@@ -2,7 +2,6 @@ package de.cronn.postgres.snapshot.util;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -22,17 +21,21 @@ public final class PostgresRestore {
 
 	public static void restoreFromFile(Path fileToRestore, String jdbcUrl, String username, String password,
 									   PostgresRestoreOption... options) {
-		try (GenericContainer<?> container =
-				 createPgRestoreInContainer(jdbcUrl, username, password, options)
-					 .withCopyFileToContainer(MountableFile.forHostPath(fileToRestore), RESTORE_FILE)) {
+		restoreFromFile(fileToRestore, jdbcUrl, username, password, List.of(), options);
+	}
+
+	public static void restoreFromFile(Path fileToRestore, String jdbcUrl, String username, String password,
+									   List<Schema> schemas, PostgresRestoreOption... options) {
+		try (GenericContainer<?> container = createPgRestoreInContainer(jdbcUrl, username, password, schemas, options)
+			.withCopyFileToContainer(MountableFile.forHostPath(fileToRestore), RESTORE_FILE)) {
 			container.start();
 		}
 	}
 
 	private static GenericContainer<?> createPgRestoreInContainer(
-		String jdbcUrl, String username, String password, PostgresRestoreOption... options) {
+		String jdbcUrl, String username, String password, List<Schema> schemas, PostgresRestoreOption... options) {
 		ConnectionInformation connectionInformation = PostgresUtils.parseConnectionInformation(jdbcUrl, username, password);
-		String[] command = createPgRestoreCommand(connectionInformation, options);
+		String[] command = createPgRestoreCommand(connectionInformation, schemas, options);
 
 		log.debug("Executing {}", String.join(" ", command));
 
@@ -42,7 +45,8 @@ public final class PostgresRestore {
 			.withCommand(command);
 	}
 
-	private static String[] createPgRestoreCommand(ConnectionInformation connectionInformation, PostgresRestoreOption... options) {
+	private static String[] createPgRestoreCommand(ConnectionInformation connectionInformation, List<Schema> schemas,
+												   PostgresRestoreOption... options) {
 		List<String> commandArgs = new ArrayList<>(List.of(
 			"pg_restore",
 			"--host=" + connectionInformation.host(),
@@ -53,7 +57,13 @@ public final class PostgresRestore {
 			commandArgs.add(2, "--port=" + connectionInformation.port());
 		}
 
-		commandArgs.addAll(Arrays.stream(options).map(PostgresRestoreOption::getCommandArgument).toList());
+		for (Schema schema : schemas) {
+			commandArgs.addAll(schema.getCommandArguments());
+		}
+
+		for (PostgresRestoreOption option : options) {
+			commandArgs.add(option.getCommandArgument());
+		}
 
 		commandArgs.add(RESTORE_FILE);
 

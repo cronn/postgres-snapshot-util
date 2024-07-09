@@ -11,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -31,8 +30,13 @@ public final class PostgresDump {
 	}
 
 	public static String dumpToString(String jdbcUrl, String username, String password, PostgresDumpOption... options) {
+		return dumpToString(jdbcUrl, username, password, List.of(), options);
+	}
+
+	public static String dumpToString(String jdbcUrl, String username, String password, List<Schema> schemas,
+									  PostgresDumpOption... options) {
 		try (StringWriter writer = new StringWriter()) {
-			dump(writer, jdbcUrl, username, password, options);
+			dump(writer, jdbcUrl, username, password, schemas, options);
 			return writer.toString();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -41,8 +45,13 @@ public final class PostgresDump {
 
 	public static void dumpToFile(Path path, String jdbcUrl, String username, String password,
 								  PostgresDumpFormat format, PostgresDumpOption... options) {
+		dumpToFile(path, jdbcUrl, username, password, format, List.of(), options);
+	}
+
+	public static void dumpToFile(Path path, String jdbcUrl, String username, String password,
+								  PostgresDumpFormat format, List<Schema> schemas, PostgresDumpOption... options) {
 		try (OutputStream outputStream = Files.newOutputStream(path)) {
-			dump(outputStream, jdbcUrl, username, password, format, options);
+			dump(outputStream, jdbcUrl, username, password, format, schemas, options);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -50,7 +59,12 @@ public final class PostgresDump {
 
 	public static void dump(Writer writer, String jdbcUrl, String username, String password,
 							PostgresDumpOption... options) {
-		dump(jdbcUrl, username, password, PostgresDumpFormat.PLAIN_TEXT, inputStream -> {
+		dump(writer, jdbcUrl, username, password, List.of(), options);
+	}
+
+	public static void dump(Writer writer, String jdbcUrl, String username, String password, List<Schema> schemas,
+							PostgresDumpOption... options) {
+		dump(jdbcUrl, username, password, PostgresDumpFormat.PLAIN_TEXT, schemas, inputStream -> {
 			try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream, ENCODING)) {
 				return inputStreamReader.transferTo(writer);
 			}
@@ -59,23 +73,30 @@ public final class PostgresDump {
 
 	public static void dump(OutputStream outputStream, String jdbcUrl, String username, String password,
 							PostgresDumpFormat format, PostgresDumpOption... options) {
-		dump(jdbcUrl, username, password, format, inputStream -> inputStream.transferTo(outputStream), options);
+		dump(outputStream, jdbcUrl, username, password, format, List.of(), options);
+	}
+
+	public static void dump(OutputStream outputStream, String jdbcUrl, String username, String password,
+							PostgresDumpFormat format, List<Schema> schemas, PostgresDumpOption... options) {
+		dump(jdbcUrl, username, password, format, schemas, inputStream -> inputStream.transferTo(outputStream), options);
 	}
 
 	public static void dump(String jdbcUrl, String username, String password, PostgresDumpFormat format,
-							ThrowingFunction<InputStream, Long> inputStreamProcessor, PostgresDumpOption... options) {
+							List<Schema> schemas, ThrowingFunction<InputStream, Long> inputStreamProcessor,
+							PostgresDumpOption... options) {
 		try (GenericContainer<?> container =
-				 createPgDumpInContainer(jdbcUrl, username, password, format, options)) {
+				 createPgDumpInContainer(jdbcUrl, username, password, format, schemas, options)) {
 			container.start();
 
 			container.copyFileFromContainer(CONTAINER_DUMP_FILE, inputStreamProcessor);
 		}
 	}
 
-	private static GenericContainer<?> createPgDumpInContainer(
-		String jdbcUrl, String username, String password, PostgresDumpFormat format, PostgresDumpOption... options) {
+	private static GenericContainer<?> createPgDumpInContainer(String jdbcUrl, String username, String password,
+															   PostgresDumpFormat format, List<Schema> schemas,
+															   PostgresDumpOption... options) {
 		ConnectionInformation connectionInformation = PostgresUtils.parseConnectionInformation(jdbcUrl, username, password);
-		String[] command = createPgDumpCommand(connectionInformation, format, options);
+		String[] command = createPgDumpCommand(connectionInformation, format, schemas, options);
 
 		log.debug("Executing {}", String.join(" ", command));
 
@@ -85,8 +106,8 @@ public final class PostgresDump {
 			.withCommand(command);
 	}
 
-	private static String[] createPgDumpCommand(ConnectionInformation connectionInformation,
-												PostgresDumpFormat format, PostgresDumpOption... options) {
+	private static String[] createPgDumpCommand(ConnectionInformation connectionInformation, PostgresDumpFormat format,
+												List<Schema> schemas, PostgresDumpOption... options) {
 		List<String> commandArgs = new ArrayList<>(List.of(
 			"pg_dump",
 			"--host=" + connectionInformation.host(),
@@ -100,7 +121,13 @@ public final class PostgresDump {
 			commandArgs.add(2, "--port=" + connectionInformation.port());
 		}
 
-		commandArgs.addAll(Arrays.stream(options).map(PostgresDumpOption::getCommandArgument).toList());
+		for (Schema schema : schemas) {
+			commandArgs.addAll(schema.getCommandArguments());
+		}
+
+		for (PostgresDumpOption option : options) {
+			commandArgs.add(option.getCommandArgument());
+		}
 
 		return commandArgs.toArray(String[]::new);
 	}

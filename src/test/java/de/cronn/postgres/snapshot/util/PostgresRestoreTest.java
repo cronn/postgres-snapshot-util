@@ -3,10 +3,7 @@ package de.cronn.postgres.snapshot.util;
 import static org.assertj.core.api.Assertions.*;
 
 import java.nio.file.Path;
-
-import static org.assertj.core.api.Assertions.*;
-
-import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -52,6 +49,26 @@ class PostgresRestoreTest extends BaseTest {
 
 			String dumpOtherPostgres = PostgresDump.dumpToString(otherPostgresJdbcUrl, USERNAME, PASSWORD);
 			assertThat(dumpOtherPostgres).isEqualTo(dumpPrimaryPostgres);
+		}
+	}
+
+	@Test
+	void testRestoreOnlySpecificSchema(@TempDir Path tempDir) {
+		Path dumpFile = tempDir.resolve("dump.tar");
+		PostgresDump.dumpToFile(dumpFile, jdbcUrl, USERNAME, PASSWORD, PostgresDumpFormat.TAR);
+
+		try (PostgreSQLContainer<?> otherPostgres = createPostgresContainer()) {
+			otherPostgres.start();
+			String otherPostgresJdbcUrl = otherPostgres.getJdbcUrl();
+
+			PostgresRestore.restoreFromFile(dumpFile, otherPostgresJdbcUrl, USERNAME, PASSWORD,
+				List.of(Schema.exclude("public")),
+				PostgresRestoreOption.SCHEMA_ONLY,
+				PostgresRestoreOption.SINGLE_TRANSACTION,
+				PostgresRestoreOption.EXIT_ON_ERROR);
+
+			String dumpAfterRestorePostgres = PostgresDump.dumpToString(otherPostgresJdbcUrl, USERNAME, PASSWORD);
+			compareActualWithValidationFile(dumpAfterRestorePostgres);
 		}
 	}
 }

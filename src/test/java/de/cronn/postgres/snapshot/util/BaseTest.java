@@ -94,6 +94,25 @@ abstract class BaseTest {
 				 (5, 'Sarah', 'Davis', 'sarah.davis@example.com', '2024-06-01', 70000.00);""")) {
 				insertStatement.execute();
 			}
+			try (PreparedStatement createSchemaStatement = connection.prepareStatement("""
+				CREATE SCHEMA other_schema""")) {
+				createSchemaStatement.execute();
+			}
+			try (PreparedStatement createTableStatement = connection.prepareStatement("""
+				CREATE TABLE other_schema.persons (
+				    id INT PRIMARY KEY,
+				    name TEXT NOT NULL
+				)""")) {
+				createTableStatement.execute();
+			}
+			try (PreparedStatement insertStatement = connection.prepareStatement("""
+				INSERT INTO other_schema.persons (id, name) VALUES
+				 (1, 'John'),
+				 (2, 'Jane'),
+				 (3, 'Emily')
+				 """)) {
+				insertStatement.execute();
+			}
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}

@@ -7,6 +7,7 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -86,7 +87,7 @@ class PostgresDumpTest extends BaseTest {
 			try (OutputStream outputStream = Files.newOutputStream(dumpFile)) {
 				PostgresDump.dump(outputStream, jdbcUrl, USERNAME, PASSWORD, PostgresDumpFormat.TAR);
 			}
-			assertThat(dumpFile).hasSize(7680);
+			assertThat(dumpFile).hasSize(10240);
 		}
 
 		@Test
@@ -123,6 +124,22 @@ class PostgresDumpTest extends BaseTest {
 		@Test
 		void testDumpWithoutPrivileges() {
 			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD, PostgresDumpOption.NO_PRIVILEGES);
+			compareActualWithValidationFile(dump);
+		}
+
+		@Test
+		void testDumpSpecificSchemaOnly() {
+			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD,
+				List.of(Schema.include("other_schema")),
+				PostgresDumpOption.NO_OWNER, PostgresDumpOption.INSERTS);
+			compareActualWithValidationFile(dump);
+		}
+
+		@Test
+		void testDumpWithoutSpecificSchema() {
+			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD,
+				List.of(Schema.exclude("other_schema")),
+				PostgresDumpOption.NO_OWNER, PostgresDumpOption.INSERTS);
 			compareActualWithValidationFile(dump);
 		}
 	}
