@@ -12,5 +12,5 @@
         <appender-ref ref="STDOUT"/>
     </root>
 
-    <logger name="de.cronn.postgres.util" level="debug"/>
+    <logger name="de.cronn.postgres.snapshot.util" level="debug"/>
 </configuration>
