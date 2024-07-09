@@ -47,7 +47,7 @@ PostgresRestore.restoreFromFile(dumpFile, jdbcUrl, "user", "pass",
 
 ### Integration / Regression Test ###
 
-`PostgresDump` was designed to be used in a JUnit (regression) tests to dump and compare the actual database Schema
+`PostgresDump` was designed to be used in a JUnit (regression) tests to dump and compare the actual database schema
 of an application in cases where the schema is managed by a library/framework such as Liquibase.
 We recommend to use our [validation-file-assertions] library to write such a test.
 
@@ -65,7 +65,7 @@ class SchemaTest implements JUnit5ValidationFileAssertions {
     @Test
     void schemaExport() {
         String schema = PostgresDump.dumpToString(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword(),
-            PostgresDumpOption.SCHEMA_ONLY);
+                                                  PostgresDumpOption.SCHEMA_ONLY);
         assertWithFile(schema);
     }
 }
