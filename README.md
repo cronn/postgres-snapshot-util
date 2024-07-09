@@ -64,8 +64,10 @@ class SchemaTest implements JUnit5ValidationFileAssertions {
 
     @Test
     void schemaExport() {
-        String schema = PostgresDump.dumpToString(postgres.getJdbcUrl(), postgres.getUsername(),
-                                                  postgres.getPassword(), PostgresDumpOption.SCHEMA_ONLY);
+        String schema = PostgresDump.dumpToString(postgres.getJdbcUrl(),
+                                                  postgres.getUsername(),
+                                                  postgres.getPassword(),
+                                                  PostgresDumpOption.SCHEMA_ONLY);
         assertWithFile(schema);
     }
 }
