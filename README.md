@@ -60,7 +60,7 @@ class SchemaTest implements JUnit5ValidationFileAssertions {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16.4");
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17.0");
 
     @Test
     void schemaExport() {
