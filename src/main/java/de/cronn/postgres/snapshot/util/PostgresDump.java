@@ -16,6 +16,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.utility.ThrowingFunction;
 
@@ -100,10 +101,13 @@ public final class PostgresDump {
 
 		log.debug("Executing {}", String.join(" ", command));
 
+		Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(log).withSeparateOutputStreams();
+
 		return PostgresUtils.createPostgresContainer(connectionInformation.postgresVersion())
 			.withEnv(PostgresConstants.PG_PASSWORD_ENVIRONMENT_VARIABLE, connectionInformation.password())
 			.withStartupCheckStrategy(new OneShotStartupCheckStrategy())
-			.withCommand(command);
+			.withCommand(command)
+			.withLogConsumer(logConsumer);
 	}
 
 	private static String[] createPgDumpCommand(ConnectionInformation connectionInformation, PostgresDumpFormat format,

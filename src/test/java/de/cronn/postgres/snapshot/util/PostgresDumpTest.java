@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.testcontainers.containers.ContainerLaunchException;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -141,6 +142,15 @@ class PostgresDumpTest extends BaseTest {
 				List.of(Schema.exclude("other_schema")),
 				PostgresDumpOption.NO_OWNER, PostgresDumpOption.INSERTS);
 			compareActualWithValidationFile(dump);
+		}
+
+		@Test
+		void testDumpWithIllegalParameters() {
+			assertThatExceptionOfType(ContainerLaunchException.class)
+				.isThrownBy(() ->
+					PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD,
+						PostgresDumpOption.SCHEMA_ONLY, PostgresDumpOption.DATA_ONLY))
+				.withMessageStartingWith("Container startup failed for image postgres:");
 		}
 	}
 

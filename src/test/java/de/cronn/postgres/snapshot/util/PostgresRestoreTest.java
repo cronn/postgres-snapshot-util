@@ -9,6 +9,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.testcontainers.containers.ContainerLaunchException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 class PostgresRestoreTest extends BaseTest {
@@ -69,6 +70,19 @@ class PostgresRestoreTest extends BaseTest {
 
 			String dumpAfterRestorePostgres = PostgresDump.dumpToString(otherPostgresJdbcUrl, USERNAME, PASSWORD);
 			compareActualWithValidationFile(dumpAfterRestorePostgres);
+		}
+	}
+
+	@Test
+	void testRestoreFromFileThatDoesNotExist() {
+		try (PostgreSQLContainer<?> otherPostgres = createPostgresContainer()) {
+			otherPostgres.start();
+			String otherPostgresJdbcUrl = otherPostgres.getJdbcUrl();
+
+			assertThatExceptionOfType(ContainerLaunchException.class)
+				.isThrownBy(() -> PostgresRestore.restoreFromFile(Path.of("does-not-exist"),
+					otherPostgresJdbcUrl, USERNAME, PASSWORD))
+				.withMessageStartingWith("Container startup failed for image postgres:");
 		}
 	}
 }
