@@ -21,6 +21,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import de.cronn.assertions.validationfile.ValidationFileAssertions;
+import de.cronn.assertions.validationfile.normalization.ValidationNormalizer;
 import de.cronn.testutils.ThreadLeakCheck;
 
 @ThreadLeakCheck.AllowedThreads(
@@ -110,7 +111,7 @@ abstract class BaseTest {
 				 (1, 'John'),
 				 (2, 'Jane'),
 				 (3, 'Emily')
-				 """)) {
+				""")) {
 				insertStatement.execute();
 			}
 		} catch (SQLException e) {
@@ -125,6 +126,10 @@ abstract class BaseTest {
 
 	protected void compareActualWithValidationFile(String actual) {
 		validationFileAssertions.assertWithFile(actual);
+	}
+
+	protected void compareActualWithValidationFile(String actual, ValidationNormalizer validationNormalizer) {
+		validationFileAssertions.assertWithFile(actual, validationNormalizer);
 	}
 
 	private class SoftValidationFileAssertions implements ValidationFileAssertions {

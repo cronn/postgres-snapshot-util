@@ -33,6 +33,13 @@ public enum PostgresRestoreOption {
 	 * skip restoration of object ownership
 	 */
 	NO_OWNER("--no-owner"),
+
+	/**
+	 * Specifies verbose mode.
+	 * This will cause pg_restore to output detailed object comments and start/stop times to the output file,
+	 * and progress messages to standard error. Repeating the option causes additional debug-level messages to appear on standard error.
+	 */
+	VERBOSE("--verbose"),
 	;
 
 	private final String commandArgument;

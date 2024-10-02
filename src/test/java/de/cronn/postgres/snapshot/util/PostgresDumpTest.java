@@ -18,6 +18,8 @@ import org.testcontainers.containers.ContainerLaunchException;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import de.cronn.assertions.validationfile.normalization.SimpleRegexReplacement;
+
 class PostgresDumpTest extends BaseTest {
 
 	@Nested
@@ -80,6 +82,13 @@ class PostgresDumpTest extends BaseTest {
 		void testDump() {
 			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD);
 			compareActualWithValidationFile(dump);
+		}
+
+		@Test
+		void testDumpVerbose() {
+			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD, PostgresDumpOption.VERBOSE);
+			compareActualWithValidationFile(dump,
+				new SimpleRegexReplacement("(Started|Completed) on \\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}", "$1 on [MASKED_TIMESTAMP]"));
 		}
 
 		@Test

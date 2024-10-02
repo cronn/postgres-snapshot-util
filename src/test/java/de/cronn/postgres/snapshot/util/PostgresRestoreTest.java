@@ -32,6 +32,18 @@ class PostgresRestoreTest extends BaseTest {
 
 	@Test
 	void testDumpAndRestore(@TempDir Path tempDir) {
+		dumpAndRestore(tempDir, PostgresRestoreOption.SINGLE_TRANSACTION,
+			PostgresRestoreOption.EXIT_ON_ERROR);
+	}
+
+	@Test
+	void testDumpAndRestoreVerbose(@TempDir Path tempDir) {
+		dumpAndRestore(tempDir, PostgresRestoreOption.SINGLE_TRANSACTION,
+			PostgresRestoreOption.VERBOSE,
+			PostgresRestoreOption.EXIT_ON_ERROR);
+	}
+
+	private void dumpAndRestore(Path tempDir, PostgresRestoreOption... postgresRestoreOptions) {
 		String dumpPrimaryPostgres = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD);
 
 		Path dumpFile = tempDir.resolve("dump.tar");
@@ -45,8 +57,7 @@ class PostgresRestoreTest extends BaseTest {
 			assertThat(dumpOtherPostgresBeforeRestore).isNotEqualTo(dumpPrimaryPostgres);
 
 			PostgresRestore.restoreFromFile(dumpFile, otherPostgresJdbcUrl, USERNAME, PASSWORD,
-				PostgresRestoreOption.SINGLE_TRANSACTION,
-				PostgresRestoreOption.EXIT_ON_ERROR);
+				postgresRestoreOptions);
 
 			String dumpOtherPostgres = PostgresDump.dumpToString(otherPostgresJdbcUrl, USERNAME, PASSWORD);
 			assertThat(dumpOtherPostgres).isEqualTo(dumpPrimaryPostgres);
