@@ -2,14 +2,15 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 16.4 (Debian 16.4-1.pgdg120+1)
--- Dumped by pg_dump version 16.4 (Debian 16.4-1.pgdg120+1)
+-- Dumped from database version 17.0 (Debian 17.0-1.pgdg120+1)
+-- Dumped by pg_dump version 17.0 (Debian 17.0-1.pgdg120+1)
 
 -- Started on [MASKED_TIMESTAMP] UTC
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -33,7 +34,7 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- TOC entry 217 (class 1259 OID 16391)
+-- TOC entry 219 (class 1259 OID 16391)
 -- Name: persons; Type: TABLE; Schema: other_schema; Owner: test-user
 --
 
@@ -46,7 +47,7 @@ CREATE TABLE other_schema.persons (
 ALTER TABLE other_schema.persons OWNER TO "test-user";
 
 --
--- TOC entry 216 (class 1259 OID 16385)
+-- TOC entry 218 (class 1259 OID 16385)
 -- Name: employees; Type: TABLE; Schema: public; Owner: test-user
 --
 
@@ -63,8 +64,8 @@ CREATE TABLE public.employees (
 ALTER TABLE public.employees OWNER TO "test-user";
 
 --
--- TOC entry 3355 (class 0 OID 16391)
--- Dependencies: 217
+-- TOC entry 3364 (class 0 OID 16391)
+-- Dependencies: 219
 -- Data for Name: persons; Type: TABLE DATA; Schema: other_schema; Owner: test-user
 --
 
@@ -76,8 +77,8 @@ COPY other_schema.persons (id, name) FROM stdin;
 
 
 --
--- TOC entry 3354 (class 0 OID 16385)
--- Dependencies: 216
+-- TOC entry 3363 (class 0 OID 16385)
+-- Dependencies: 218
 -- Data for Name: employees; Type: TABLE DATA; Schema: public; Owner: test-user
 --
 
@@ -91,7 +92,7 @@ COPY public.employees (id, first_name, last_name, email, hire_date, salary) FROM
 
 
 --
--- TOC entry 3210 (class 2606 OID 16397)
+-- TOC entry 3217 (class 2606 OID 16397)
 -- Name: persons persons_pkey; Type: CONSTRAINT; Schema: other_schema; Owner: test-user
 --
 
@@ -100,7 +101,7 @@ ALTER TABLE ONLY other_schema.persons
 
 
 --
--- TOC entry 3208 (class 2606 OID 16389)
+-- TOC entry 3215 (class 2606 OID 16389)
 -- Name: employees employees_pkey; Type: CONSTRAINT; Schema: public; Owner: test-user
 --
 
