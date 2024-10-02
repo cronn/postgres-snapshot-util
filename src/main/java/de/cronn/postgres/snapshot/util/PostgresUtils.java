@@ -68,4 +68,8 @@ final class PostgresUtils {
 	private static boolean isLocalhost(InetAddress inetAddress) throws UnknownHostException {
 		return InetAddress.getByName("localhost").equals(inetAddress);
 	}
+
+	static String deriveNetworkMode(ConnectionInformation connectionInformation) {
+		return connectionInformation.host().equals(PostgresConstants.DOCKER_HOST_INTERNAL) ? null : "host";
+	}
 }

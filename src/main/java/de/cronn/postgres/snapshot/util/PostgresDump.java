@@ -104,6 +104,7 @@ public final class PostgresDump {
 		Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(log).withSeparateOutputStreams();
 
 		return PostgresUtils.createPostgresContainer(connectionInformation.postgresVersion())
+			.withNetworkMode(PostgresUtils.deriveNetworkMode(connectionInformation))
 			.withEnv(PostgresConstants.PG_PASSWORD_ENVIRONMENT_VARIABLE, connectionInformation.password())
 			.withStartupCheckStrategy(new OneShotStartupCheckStrategy())
 			.withCommand(command)
