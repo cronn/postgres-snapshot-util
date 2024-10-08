@@ -8,6 +8,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -15,7 +17,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.testcontainers.containers.ContainerLaunchException;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.utility.DockerImageName;
 
 import de.cronn.assertions.validationfile.normalization.SimpleRegexReplacement;
@@ -171,6 +176,36 @@ class PostgresDumpTest extends BaseTest {
 
 			String schema = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD, PostgresDumpOption.SCHEMA_ONLY);
 			compareActualWithValidationFile(schema);
+		}
+	}
+
+	@Test
+	void testConnectViaDockerContainerIpAddress() {
+		String networkAlias = "postgres-db";
+		try (Network network = Network.newNetwork();
+			 PostgreSQLContainer<?> postgresInNetworkContainer = createPostgresContainer(DockerImageName.parse("postgres:17.0"))
+				 .withNetwork(network)
+				 .withNetworkAliases(networkAlias)) {
+			postgresInNetworkContainer.start();
+
+			String ipAddress = resolveHostname(network, networkAlias);
+
+			String jdbcUrl = "jdbc:postgresql://%s/test-db".formatted(ipAddress);
+			String schema = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD);
+			compareActualWithValidationFile(schema);
+		}
+	}
+
+	private String resolveHostname(Network network, String hostname) {
+		try (GenericContainer<?> dnsContainer = new GenericContainer<>("alpine:3.20.3")
+			.withNetwork(network)
+			.withCommand("getent hosts " + hostname)
+			.withStartupCheckStrategy(new OneShotStartupCheckStrategy())) {
+			dnsContainer.start();
+			String logs = dnsContainer.getLogs();
+			Matcher matcher = Pattern.compile("(\\d+\\.\\d+\\.\\d+\\.\\d+)\\s+" + hostname + "\\s+" + hostname + "\\n").matcher(logs);
+			assertThat(matcher.matches()).describedAs("Failed to parse '%s'", logs).isTrue();
+			return matcher.group(1);
 		}
 	}
 }
