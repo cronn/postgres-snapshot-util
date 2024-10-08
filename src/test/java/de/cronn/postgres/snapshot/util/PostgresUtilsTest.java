@@ -3,7 +3,6 @@ package de.cronn.postgres.snapshot.util;
 import static org.assertj.core.api.Assertions.*;
 
 import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 
 import org.junit.jupiter.api.Test;
 
@@ -19,10 +18,9 @@ class PostgresUtilsTest {
 
 	@Test
 	void testParseConnectionInformation_unknownHost() {
-		assertThatExceptionOfType(IllegalArgumentException.class)
-			.isThrownBy(() -> PostgresUtils.parseConnectionInformation("jdbc:postgresql://unknown-host", "user", "password"))
-			.withCauseExactlyInstanceOf(UnknownHostException.class)
-			.withMessage("Failed to resolve host");
+		assertThatExceptionOfType(RuntimeException.class)
+			.isThrownBy(() -> PostgresUtils.parseConnectionInformation("jdbc:postgresql://unknown-host/test", "user", "password"))
+			.withMessage("org.postgresql.util.PSQLException: The connection attempt failed.");
 	}
 
 	@Test

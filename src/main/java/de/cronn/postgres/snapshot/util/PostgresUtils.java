@@ -28,7 +28,7 @@ final class PostgresUtils {
 		URI databaseUri = toUri(jdbcUrl);
 
 		int port = databaseUri.getPort();
-		String host = resolveHost(databaseUri.getHost());
+		String host = prepareHostname(databaseUri.getHost());
 
 		Properties connectionProperties = new Properties();
 		connectionProperties.put("user", username);
@@ -52,21 +52,21 @@ final class PostgresUtils {
 		}
 	}
 
-	private static String resolveHost(String host) {
-		try {
-			InetAddress inetAddress = InetAddress.getByName(host);
-			if (isLocalhost(inetAddress)) {
-				return PostgresConstants.DOCKER_HOST_INTERNAL;
-			} else {
-				return inetAddress.getHostAddress();
-			}
-		} catch (UnknownHostException e) {
-			throw new IllegalArgumentException("Failed to resolve host", e);
+	private static String prepareHostname(String host) {
+		if (isLocalhost(host)) {
+			return PostgresConstants.DOCKER_HOST_INTERNAL;
+		} else {
+			return host;
 		}
 	}
 
-	private static boolean isLocalhost(InetAddress inetAddress) throws UnknownHostException {
-		return InetAddress.getByName("localhost").equals(inetAddress);
+	private static boolean isLocalhost(String host) {
+		try {
+			InetAddress localHost = InetAddress.getLocalHost();
+			return localHost.getHostName().equals(host) || localHost.getHostAddress().equals(host);
+		} catch (UnknownHostException e) {
+			throw new RuntimeException("Failed resolve localhost", e);
+		}
 	}
 
 	static String deriveNetworkMode(ConnectionInformation connectionInformation) {
