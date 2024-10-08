@@ -1,5 +1,6 @@
 package de.cronn.postgres.snapshot.util;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -8,13 +9,27 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Properties;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testcontainers.DockerClientFactory;
+import org.testcontainers.containers.Container.ExecResult;
+import org.testcontainers.containers.ExecInContainerPattern;
 import org.testcontainers.containers.GenericContainer;
+
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.InspectContainerResponse;
+import com.github.dockerjava.api.model.ContainerNetwork;
 
 final class PostgresUtils {
 
+	private static final Logger log = LoggerFactory.getLogger(PostgresUtils.class);
+
+	private static final Pattern POSTGRES_VERSION_PATTERN = Pattern.compile("postgres \\(PostgreSQL\\) (\\d+\\.\\d+) \\(.+\\)");
 	private static final String JDBC_URL_PREFIX = "jdbc:";
 
 	static GenericContainer<?> createPostgresContainer(String postgresVersion) {
@@ -29,22 +44,83 @@ final class PostgresUtils {
 
 	static ConnectionInformation parseConnectionInformation(String jdbcUrl, String username, String password) {
 		URI databaseUri = toUri(jdbcUrl);
+		ContainerAndNetwork containerAndNetwork = findDockerContainer(databaseUri.getHost());
 
-		int port = databaseUri.getPort();
-		String host = prepareHostname(databaseUri.getHost());
+		if (containerAndNetwork != null) {
+			String postgresVersion = findPostgresVersionOfRunningContainer(containerAndNetwork.inspectResponse());
+			String databaseUriPath = databaseUri.getPath();
+			if (!databaseUriPath.startsWith("/")) {
+				throw new IllegalArgumentException("Unexpected path: " + databaseUriPath);
+			}
+			String databaseName = databaseUriPath.substring(1);
+			String host = databaseUri.getHost();
+			int port = databaseUri.getPort();
+			String dockerNetworkId = containerAndNetwork.network().getNetworkID();
+			return new ConnectionInformation(postgresVersion, host, dockerNetworkId, port, databaseName, username, password);
 
-		Properties connectionProperties = new Properties();
-		connectionProperties.put("user", username);
-		connectionProperties.put("password", password);
+		} else {
+			try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password)) {
+				DatabaseMetaData metaData = connection.getMetaData();
+				String postgresVersion = "%d.%d".formatted(metaData.getDatabaseMajorVersion(), metaData.getDatabaseMinorVersion());
+				String databaseName = connection.getCatalog();
+				String host = prepareHostname(databaseUri.getHost());
+				int port = databaseUri.getPort();
+				return new ConnectionInformation(postgresVersion, host, null, port, databaseName, username, password);
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
 
-		try (Connection connection = DriverManager.getConnection(jdbcUrl, connectionProperties)) {
-			DatabaseMetaData metaData = connection.getMetaData();
-			String postgresVersion = "%d.%d".formatted(metaData.getDatabaseMajorVersion(), metaData.getDatabaseMinorVersion());
-			String databaseName = connection.getCatalog();
-			return new ConnectionInformation(postgresVersion, host, port, databaseName, username, password);
-		} catch (SQLException e) {
+	private static String findPostgresVersionOfRunningContainer(InspectContainerResponse containerInfo) {
+		DockerClient client = DockerClientFactory.instance().client();
+		try {
+			ExecResult execResult = ExecInContainerPattern.execInContainer(client, containerInfo, "postgres", "--version");
+
+			int exitCode = execResult.getExitCode();
+			if (!execResult.getStderr().isBlank()) {
+				log.error("Failed to obtain PostgreSQL version: {}", execResult.getStderr().trim());
+			}
+			if (exitCode != 0) {
+				throw new RuntimeException("Failed to obtain PostgreSQL version. Command exited with code " + exitCode);
+			}
+			String postgresVersionOutput = execResult.getStdout().trim();
+			Matcher matcher = POSTGRES_VERSION_PATTERN.matcher(postgresVersionOutput);
+			if (!matcher.matches()) {
+				throw new RuntimeException("Failed to parse PostgreSQL version: " + postgresVersionOutput);
+			}
+
+			return matcher.group(1);
+		} catch (IOException | InterruptedException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private record ContainerAndNetwork(InspectContainerResponse inspectResponse, ContainerNetwork network) {
+	}
+
+	static ContainerAndNetwork findDockerContainer(String host) {
+		if (isLocalhost(host)) {
+			return null;
+		}
+
+		DockerClient client = DockerClientFactory.instance().client();
+
+		return client.listContainersCmd().exec().stream()
+			.map(container -> {
+				InspectContainerResponse inspectContainerResponse = client.inspectContainerCmd(container.getId()).exec();
+				for (ContainerNetwork network : inspectContainerResponse.getNetworkSettings().getNetworks().values()) {
+					if (network.getAliases() != null && network.getAliases().contains(host)) {
+						log.debug("Found Docker container {} with network {}",
+							String.join(", ", container.getNames()), network.getNetworkID());
+						return new ContainerAndNetwork(inspectContainerResponse, network);
+					}
+				}
+				return null;
+			})
+			.filter(Objects::nonNull)
+			.findFirst()
+			.orElse(null);
 	}
 
 	private static URI toUri(String jdbcUrl) {
@@ -76,6 +152,12 @@ final class PostgresUtils {
 	}
 
 	static String deriveNetworkMode(ConnectionInformation connectionInformation) {
-		return connectionInformation.host().equals(PostgresConstants.DOCKER_HOST_INTERNAL) ? null : "host";
+		if (connectionInformation.host().equals(PostgresConstants.DOCKER_HOST_INTERNAL)) {
+			return null;
+		} else if (connectionInformation.dockerNetworkId() != null) {
+			return connectionInformation.dockerNetworkId();
+		} else {
+			return "host";
+		}
 	}
 }

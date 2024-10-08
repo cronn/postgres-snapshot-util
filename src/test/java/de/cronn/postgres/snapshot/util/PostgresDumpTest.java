@@ -16,6 +16,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.testcontainers.containers.ContainerLaunchException;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -193,6 +195,26 @@ class PostgresDumpTest extends BaseTest {
 			String jdbcUrl = "jdbc:postgresql://%s/test-db".formatted(ipAddress);
 			String schema = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD);
 			compareActualWithValidationFile(schema);
+		}
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"vanilla-17, postgres:17.0",
+		"postgis-17, postgis/postgis:17-3.4",
+	})
+	void testConnectViaDockerNetworkAlias(String testName, String fullImageName) {
+		String networkAlias = "postgres-db";
+		try (Network network = Network.newNetwork();
+			 PostgreSQLContainer<?> postgresInNetworkContainer = createPostgresContainer(DockerImageName.parse(fullImageName)
+				 .asCompatibleSubstituteFor("postgres"))
+				 .withNetwork(network)
+				 .withNetworkAliases(networkAlias)) {
+			postgresInNetworkContainer.start();
+
+			String jdbcUrl = "jdbc:postgresql://%s/test-db".formatted(networkAlias);
+			String schema = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD);
+			compareActualWithValidationFile(schema, testName);
 		}
 	}
 

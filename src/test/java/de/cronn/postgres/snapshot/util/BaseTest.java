@@ -128,6 +128,10 @@ abstract class BaseTest {
 		validationFileAssertions.assertWithFile(actual);
 	}
 
+	protected void compareActualWithValidationFile(String actual, String suffix) {
+		validationFileAssertions.assertWithFileWithSuffix(actual, suffix);
+	}
+
 	protected void compareActualWithValidationFile(String actual, ValidationNormalizer validationNormalizer) {
 		validationFileAssertions.assertWithFile(actual, validationNormalizer);
 	}
