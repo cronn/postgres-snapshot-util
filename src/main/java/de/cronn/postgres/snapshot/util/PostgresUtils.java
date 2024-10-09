@@ -14,6 +14,9 @@ import org.apache.commons.lang3.SystemUtils;
 import org.testcontainers.containers.GenericContainer;
 
 final class PostgresUtils {
+
+	private static final String JDBC_URL_PREFIX = "jdbc:";
+
 	static GenericContainer<?> createPostgresContainer(String postgresVersion) {
 		GenericContainer<?> container = new GenericContainer<>("postgres:" + postgresVersion);
 
@@ -45,8 +48,11 @@ final class PostgresUtils {
 	}
 
 	private static URI toUri(String jdbcUrl) {
+		if (!jdbcUrl.startsWith(JDBC_URL_PREFIX)) {
+			throw new IllegalArgumentException("Unexpected jdbcUrl: " + jdbcUrl);
+		}
 		try {
-			return new URI(jdbcUrl.replaceFirst("^jdbc:", ""));
+			return new URI(jdbcUrl.substring(JDBC_URL_PREFIX.length()));
 		} catch (URISyntaxException e) {
 			throw new IllegalArgumentException(e);
 		}
