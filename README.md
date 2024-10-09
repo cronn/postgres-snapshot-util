@@ -43,6 +43,34 @@ PostgresRestore.restoreFromFile(dumpFile, jdbcUrl, "user", "pass",
                                 PostgresRestoreOption.SINGLE_TRANSACTION);
 ```
 
+### Connect to PostgreSQL using Docker network alias
+
+`PostgresDump` and `PostgresRestore` implement a mechanism to connect to a PostgreSQL database that is running in a Docker container by using the network alias.
+This allows for seamless interaction without the need to expose ports to the host machine or rewriting the JDBC URL.
+
+**Example:**
+
+Consider the following simple `docker-compose.yml` file:
+
+```yaml
+services:
+  postgres-db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: my-db
+```
+
+In this setup the PostgreSQL service is named `postgres-db`.
+
+`PostgresDump` and `PostgresRestore` can connect to the database by using the Docker network alias `postgres-db`:
+
+```java
+String jdbcUrl = "jdbc:postgresql://postgres-db/my-db";
+String schemaDump = PostgresDump.dumpToString(jdbcUrl, "user", "password");
+```
+
 ## Use Cases ##
 
 ### Integration / Regression Test ###
