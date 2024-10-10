@@ -44,7 +44,8 @@ final class PostgresUtils {
 
 	static ConnectionInformation parseConnectionInformation(String jdbcUrl, String username, String password) {
 		URI databaseUri = toUri(jdbcUrl);
-		ContainerAndNetwork containerAndNetwork = findDockerContainer(databaseUri.getHost());
+		String host = prepareHostname(databaseUri.getHost());
+		ContainerAndNetwork containerAndNetwork = findDockerContainer(host);
 
 		if (containerAndNetwork != null) {
 			String postgresVersion = findPostgresVersionOfRunningContainer(containerAndNetwork.inspectResponse());
@@ -53,21 +54,32 @@ final class PostgresUtils {
 				throw new IllegalArgumentException("Unexpected path: " + databaseUriPath);
 			}
 			String databaseName = databaseUriPath.substring(1);
-			String host = databaseUri.getHost();
 			int port = databaseUri.getPort();
 			String dockerNetworkId = containerAndNetwork.network().getNetworkID();
 			return new ConnectionInformation(postgresVersion, host, dockerNetworkId, port, databaseName, username, password);
-
 		} else {
 			try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password)) {
 				DatabaseMetaData metaData = connection.getMetaData();
 				String postgresVersion = "%d.%d".formatted(metaData.getDatabaseMajorVersion(), metaData.getDatabaseMinorVersion());
 				String databaseName = connection.getCatalog();
-				String host = prepareHostname(databaseUri.getHost());
 				int port = databaseUri.getPort();
-				return new ConnectionInformation(postgresVersion, host, null, port, databaseName, username, password);
+				String resolvedHost = resolveHostIfNecessary(host);
+				return new ConnectionInformation(postgresVersion, resolvedHost, null, port, databaseName, username, password);
 			} catch (SQLException e) {
 				throw new RuntimeException(e);
+			}
+		}
+	}
+
+	private static String resolveHostIfNecessary(String host) {
+		if (isDockerHostInternal(host)) {
+			return host;
+		} else {
+			try {
+				return InetAddress.getByName(host).getHostAddress();
+			} catch (UnknownHostException e) {
+				log.warn("Failed to resolve '{}'", host, e);
+				return host;
 			}
 		}
 	}
@@ -100,7 +112,7 @@ final class PostgresUtils {
 	}
 
 	static ContainerAndNetwork findDockerContainer(String host) {
-		if (isLocalhost(host)) {
+		if (isDockerHostInternal(host)) {
 			return null;
 		}
 
@@ -161,12 +173,18 @@ final class PostgresUtils {
 	}
 
 	static String deriveNetworkMode(ConnectionInformation connectionInformation) {
-		if (connectionInformation.host().equals(PostgresConstants.DOCKER_HOST_INTERNAL)) {
+		if (isDockerHostInternal(connectionInformation.host())) {
 			return null;
 		} else if (connectionInformation.dockerNetworkId() != null) {
+			log.debug("Using Docker network '{}'", connectionInformation.dockerNetworkId());
 			return connectionInformation.dockerNetworkId();
 		} else {
+			log.debug("Using network mode 'host'");
 			return "host";
 		}
+	}
+
+	private static boolean isDockerHostInternal(String host) {
+		return host.equals(PostgresConstants.DOCKER_HOST_INTERNAL);
 	}
 }

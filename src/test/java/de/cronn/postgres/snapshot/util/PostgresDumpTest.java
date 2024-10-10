@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.io.OutputStream;
 import java.io.Writer;
+import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -167,6 +168,15 @@ class PostgresDumpTest extends BaseTest {
 					PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD,
 						PostgresDumpOption.SCHEMA_ONLY, PostgresDumpOption.DATA_ONLY))
 				.withMessageStartingWith("Container startup failed for image postgres:");
+		}
+
+		@Test
+		void testConnectViaHostName() throws Exception {
+			String jdbcUrl = postgresContainer.getJdbcUrl();
+			assertThat(jdbcUrl).contains("://localhost:");
+			String replacedJdbcUrl = jdbcUrl.replaceFirst("localhost:", InetAddress.getLocalHost().getHostName() + ":");
+			String schema = PostgresDump.dumpToString(replacedJdbcUrl, USERNAME, PASSWORD);
+			compareActualWithValidationFile(schema);
 		}
 	}
 
