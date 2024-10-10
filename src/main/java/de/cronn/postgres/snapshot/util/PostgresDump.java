@@ -24,8 +24,9 @@ public final class PostgresDump {
 
 	private static final Logger log = LoggerFactory.getLogger(PostgresDump.class);
 
+	public static final Charset ENCODING = StandardCharsets.UTF_8;
+
 	private static final String CONTAINER_DUMP_FILE = "/tmp/pg_dump.data";
-	private static final Charset ENCODING = StandardCharsets.UTF_8;
 
 	private PostgresDump() {
 	}
