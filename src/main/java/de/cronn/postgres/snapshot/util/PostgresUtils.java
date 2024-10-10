@@ -142,12 +142,21 @@ final class PostgresUtils {
 		}
 	}
 
-	private static boolean isLocalhost(String host) {
+	static boolean isLocalhost(String host) {
+		if (host.equals("localhost")) {
+			return true;
+		}
+		InetAddress inetAddress;
 		try {
-			InetAddress localHost = InetAddress.getLocalHost();
-			return localHost.getHostName().equals(host) || localHost.getHostAddress().equals(host);
+			inetAddress = InetAddress.getByName(host);
 		} catch (UnknownHostException e) {
-			throw new RuntimeException("Failed resolve localhost", e);
+			log.trace("Failed to resolve host '{}'", host, e);
+			return false;
+		}
+		try {
+			return InetAddress.getByName("localhost").equals(inetAddress);
+		} catch (UnknownHostException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
