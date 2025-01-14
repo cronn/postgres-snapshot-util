@@ -171,6 +171,22 @@ class PostgresDumpTest extends BaseTest {
 		}
 
 		@Test
+		void testDumpExcludingTableData() {
+			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD,
+				List.of(), List.of("emplo*"));
+			compareActualWithValidationFile(dump);
+		}
+
+		@Test
+		void testDumpToFileExcludingTableData(@TempDir Path tempDir) throws Exception {
+			Path dumpFile = tempDir.resolve("dump.sql");
+			PostgresDump.dumpToFile(dumpFile, jdbcUrl, USERNAME, PASSWORD, PostgresDumpFormat.PLAIN_TEXT,
+				List.of(), List.of("other_schema.persons"), PostgresDumpOption.INSERTS);
+			String fileContent = Files.readString(dumpFile, PostgresDump.ENCODING);
+			compareActualWithValidationFile(fileContent);
+		}
+
+		@Test
 		void testConnectViaHostName() throws Exception {
 			String jdbcUrl = postgresContainer.getJdbcUrl();
 			assertThat(jdbcUrl).contains("://localhost:");
