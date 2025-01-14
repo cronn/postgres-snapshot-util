@@ -211,7 +211,7 @@ class PostgresDumpTest extends BaseTest {
 	void testConnectViaDockerContainerIpAddress() {
 		String networkAlias = "postgres-db";
 		try (Network network = Network.newNetwork();
-			 PostgreSQLContainer<?> postgresInNetworkContainer = createPostgresContainer(DockerImageName.parse("postgres:17.0"))
+			 PostgreSQLContainer<?> postgresInNetworkContainer = createPostgresContainer(DockerImageName.parse("postgres:17.2"))
 				 .withNetwork(network)
 				 .withNetworkAliases(networkAlias)) {
 			postgresInNetworkContainer.start();
@@ -226,7 +226,7 @@ class PostgresDumpTest extends BaseTest {
 
 	@ParameterizedTest
 	@CsvSource({
-		"vanilla-17, postgres:17.0",
+		"vanilla-17, postgres:17.2",
 		"postgis-17, postgis/postgis:17-3.4",
 	})
 	void testConnectViaDockerNetworkAlias(String testName, String fullImageName) {

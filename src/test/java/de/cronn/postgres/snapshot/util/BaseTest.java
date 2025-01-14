@@ -43,7 +43,7 @@ import de.cronn.testutils.ThreadLeakCheck;
 })
 abstract class BaseTest {
 
-	private static final DockerImageName POSTGRES_DOCKER_IMAGE = DockerImageName.parse("postgres:17.0");
+	private static final DockerImageName POSTGRES_DOCKER_IMAGE = DockerImageName.parse("postgres:17.2");
 
 	private static final String DATABASE_NAME = "test-db";
 	protected static final String USERNAME = "test-user";
