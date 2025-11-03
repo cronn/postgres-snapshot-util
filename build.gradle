@@ -71,7 +71,7 @@ dependencyLocking {
 }
 
 wrapper {
-    gradleVersion = "8.14.1"
+    gradleVersion = "9.2.0"
     distributionType = Wrapper.DistributionType.ALL
 }
 
