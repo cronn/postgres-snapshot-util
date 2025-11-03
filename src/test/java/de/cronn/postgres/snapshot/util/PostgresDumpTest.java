@@ -47,7 +47,7 @@ class PostgresDumpTest extends BaseTest {
 		@Test
 		void testDumpToString() {
 			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD);
-			compareActualWithValidationFile(dump);
+			compareActualWithValidationFile(dump, normalizeRestrictKey());
 		}
 
 		@Test
@@ -57,13 +57,13 @@ class PostgresDumpTest extends BaseTest {
 				PostgresDump.dump(writer, jdbcUrl, USERNAME, PASSWORD);
 			}
 			String dump = Files.readString(dumpFile, StandardCharsets.UTF_8);
-			compareActualWithValidationFile(dump);
+			compareActualWithValidationFile(dump, normalizeRestrictKey());
 		}
 
 		@Test
 		void testSchemaOnly() {
 			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD, PostgresDumpOption.SCHEMA_ONLY);
-			compareActualWithValidationFile(dump);
+			compareActualWithValidationFile(dump, normalizeRestrictKey());
 		}
 	}
 
@@ -89,14 +89,15 @@ class PostgresDumpTest extends BaseTest {
 		@Test
 		void testDump() {
 			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD);
-			compareActualWithValidationFile(dump);
+			compareActualWithValidationFile(dump, normalizeRestrictKey());
 		}
 
 		@Test
 		void testDumpVerbose() {
 			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD, PostgresDumpOption.VERBOSE);
 			compareActualWithValidationFile(dump,
-				new SimpleRegexReplacement("(Started|Completed) on \\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}", "$1 on [MASKED_TIMESTAMP]"));
+				normalizeRestrictKey().and(
+					new SimpleRegexReplacement("(Started|Completed) on \\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}", "$1 on [MASKED_TIMESTAMP]")));
 		}
 
 		@Test
@@ -105,19 +106,19 @@ class PostgresDumpTest extends BaseTest {
 			try (OutputStream outputStream = Files.newOutputStream(dumpFile)) {
 				PostgresDump.dump(outputStream, jdbcUrl, USERNAME, PASSWORD, PostgresDumpFormat.TAR);
 			}
-			assertThat(dumpFile).hasSize(10240);
+			assertThat(dumpFile).hasSize(10752);
 		}
 
 		@Test
 		void testSchemaOnly() {
 			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD, PostgresDumpOption.SCHEMA_ONLY);
-			compareActualWithValidationFile(dump);
+			compareActualWithValidationFile(dump, normalizeRestrictKey());
 		}
 
 		@Test
 		void testDataOnly() {
 			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD, PostgresDumpOption.DATA_ONLY);
-			compareActualWithValidationFile(dump);
+			compareActualWithValidationFile(dump, normalizeRestrictKey());
 		}
 
 		@Test
@@ -126,7 +127,7 @@ class PostgresDumpTest extends BaseTest {
 				PostgresDumpOption.CLEAN,
 				PostgresDumpOption.CREATE,
 				PostgresDumpOption.SCHEMA_ONLY);
-			compareActualWithValidationFile(dump);
+			compareActualWithValidationFile(dump, normalizeRestrictKey());
 		}
 
 		@Test
@@ -136,13 +137,13 @@ class PostgresDumpTest extends BaseTest {
 				PostgresDumpOption.IF_EXISTS,
 				PostgresDumpOption.CREATE,
 				PostgresDumpOption.SCHEMA_ONLY);
-			compareActualWithValidationFile(dump);
+			compareActualWithValidationFile(dump, normalizeRestrictKey());
 		}
 
 		@Test
 		void testDumpWithoutPrivileges() {
 			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD, PostgresDumpOption.NO_PRIVILEGES);
-			compareActualWithValidationFile(dump);
+			compareActualWithValidationFile(dump, normalizeRestrictKey());
 		}
 
 		@Test
@@ -150,7 +151,7 @@ class PostgresDumpTest extends BaseTest {
 			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD,
 				List.of(Schema.include("other_schema")),
 				PostgresDumpOption.NO_OWNER, PostgresDumpOption.INSERTS);
-			compareActualWithValidationFile(dump);
+			compareActualWithValidationFile(dump, normalizeRestrictKey());
 		}
 
 		@Test
@@ -158,7 +159,7 @@ class PostgresDumpTest extends BaseTest {
 			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD,
 				List.of(Schema.exclude("other_schema")),
 				PostgresDumpOption.NO_OWNER, PostgresDumpOption.INSERTS);
-			compareActualWithValidationFile(dump);
+			compareActualWithValidationFile(dump, normalizeRestrictKey());
 		}
 
 		@Test
@@ -174,7 +175,7 @@ class PostgresDumpTest extends BaseTest {
 		void testDumpExcludingTableData() {
 			String dump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD,
 				List.of(), List.of("emplo*"));
-			compareActualWithValidationFile(dump);
+			compareActualWithValidationFile(dump, normalizeRestrictKey());
 		}
 
 		@Test
@@ -183,7 +184,7 @@ class PostgresDumpTest extends BaseTest {
 			PostgresDump.dumpToFile(dumpFile, jdbcUrl, USERNAME, PASSWORD, PostgresDumpFormat.PLAIN_TEXT,
 				List.of(), List.of("other_schema.persons"), PostgresDumpOption.INSERTS);
 			String fileContent = Files.readString(dumpFile, PostgresDump.ENCODING);
-			compareActualWithValidationFile(fileContent);
+			compareActualWithValidationFile(fileContent, normalizeRestrictKey());
 		}
 
 		@Test
@@ -192,7 +193,7 @@ class PostgresDumpTest extends BaseTest {
 			assertThat(jdbcUrl).contains("://localhost:");
 			String replacedJdbcUrl = jdbcUrl.replaceFirst("localhost:", InetAddress.getLocalHost().getHostName() + ":");
 			String schema = PostgresDump.dumpToString(replacedJdbcUrl, USERNAME, PASSWORD);
-			compareActualWithValidationFile(schema);
+			compareActualWithValidationFile(schema, normalizeRestrictKey());
 		}
 	}
 
@@ -203,7 +204,7 @@ class PostgresDumpTest extends BaseTest {
 			String jdbcUrl = otherPostgresContainer.getJdbcUrl();
 
 			String schema = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD, PostgresDumpOption.SCHEMA_ONLY);
-			compareActualWithValidationFile(schema);
+			compareActualWithValidationFile(schema, normalizeRestrictKey());
 		}
 	}
 
@@ -211,7 +212,7 @@ class PostgresDumpTest extends BaseTest {
 	void testConnectViaDockerContainerIpAddress() {
 		String networkAlias = "postgres-db";
 		try (Network network = Network.newNetwork();
-			 PostgreSQLContainer<?> postgresInNetworkContainer = createPostgresContainer(DockerImageName.parse("postgres:17.5"))
+			 PostgreSQLContainer<?> postgresInNetworkContainer = createPostgresContainer(DockerImageName.parse("postgres:17.6"))
 				 .withNetwork(network)
 				 .withNetworkAliases(networkAlias)) {
 			postgresInNetworkContainer.start();
@@ -220,14 +221,14 @@ class PostgresDumpTest extends BaseTest {
 
 			String jdbcUrl = "jdbc:postgresql://%s/test-db".formatted(ipAddress);
 			String schema = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD);
-			compareActualWithValidationFile(schema);
+			compareActualWithValidationFile(schema, normalizeRestrictKey());
 		}
 	}
 
 	@ParameterizedTest
 	@CsvSource({
-		"vanilla-17, postgres:17.5",
-		"postgis-17, postgis/postgis:17-3.5",
+		"vanilla-17, postgres:17.6",
+		"postgis-17, postgis/postgis:17-3.6-alpine",
 	})
 	void testConnectViaDockerNetworkAlias(String testName, String fullImageName) {
 		String networkAlias = "postgres-db";
@@ -240,7 +241,7 @@ class PostgresDumpTest extends BaseTest {
 
 			String jdbcUrl = "jdbc:postgresql://%s/test-db".formatted(networkAlias);
 			String schema = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD);
-			compareActualWithValidationFile(schema, testName);
+			compareActualWithValidationFile(schema, normalizeRestrictKey(), testName);
 		}
 	}
 
@@ -256,4 +257,5 @@ class PostgresDumpTest extends BaseTest {
 			return matcher.group(1);
 		}
 	}
+
 }

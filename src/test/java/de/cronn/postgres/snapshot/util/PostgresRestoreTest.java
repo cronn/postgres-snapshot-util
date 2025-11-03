@@ -60,7 +60,8 @@ class PostgresRestoreTest extends BaseTest {
 				postgresRestoreOptions);
 
 			String dumpOtherPostgres = PostgresDump.dumpToString(otherPostgresJdbcUrl, USERNAME, PASSWORD);
-			assertThat(dumpOtherPostgres).isEqualTo(dumpPrimaryPostgres);
+			assertThat(normalizeRestrictKey().normalize(dumpOtherPostgres))
+				.isEqualTo(normalizeRestrictKey().normalize(dumpPrimaryPostgres));
 		}
 	}
 
@@ -80,7 +81,7 @@ class PostgresRestoreTest extends BaseTest {
 				PostgresRestoreOption.EXIT_ON_ERROR);
 
 			String dumpAfterRestorePostgres = PostgresDump.dumpToString(otherPostgresJdbcUrl, USERNAME, PASSWORD);
-			compareActualWithValidationFile(dumpAfterRestorePostgres);
+			compareActualWithValidationFile(dumpAfterRestorePostgres, normalizeRestrictKey());
 		}
 	}
 

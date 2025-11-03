@@ -2,8 +2,10 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 17.5 (Debian 17.5-1.pgdg110+1)
--- Dumped by pg_dump version 17.5 (Debian 17.5-1.pgdg120+1)
+\restrict RESTRICT_KEY1
+
+-- Dumped from database version 17.6
+-- Dumped by pg_dump version 17.6 (Debian 17.6-2.pgdg13+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -151,7 +153,7 @@ COPY tiger.pagc_rules (id, rule, is_custom) FROM stdin;
 -- Data for Name: topology; Type: TABLE DATA; Schema: topology; Owner: test-user
 --
 
-COPY topology.topology (id, name, srid, "precision", hasz) FROM stdin;
+COPY topology.topology (id, name, srid, "precision", hasz, useslargeids) FROM stdin;
 \.
 
 
@@ -173,3 +175,5 @@ SELECT pg_catalog.setval('topology.topology_id_seq', 1, false);
 --
 -- PostgreSQL database dump complete
 --
+
+\unrestrict RESTRICT_KEY1

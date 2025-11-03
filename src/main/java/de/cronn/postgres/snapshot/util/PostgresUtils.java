@@ -30,7 +30,7 @@ final class PostgresUtils {
 
 	private static final Logger log = LoggerFactory.getLogger(PostgresUtils.class);
 
-	private static final Pattern POSTGRES_VERSION_PATTERN = Pattern.compile("postgres \\(PostgreSQL\\) (\\d+\\.\\d+) \\(.+\\)");
+	private static final Pattern POSTGRES_VERSION_PATTERN = Pattern.compile("postgres \\(PostgreSQL\\) (\\d+\\.\\d+)(?: \\(.+\\))?");
 	private static final String JDBC_URL_PREFIX = "jdbc:";
 
 	static GenericContainer<?> createPostgresContainer(String postgresVersion) {

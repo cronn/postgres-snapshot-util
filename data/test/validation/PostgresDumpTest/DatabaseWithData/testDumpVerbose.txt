@@ -2,8 +2,10 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 17.5 (Debian 17.5-1.pgdg120+1)
--- Dumped by pg_dump version 17.5 (Debian 17.5-1.pgdg120+1)
+\restrict RESTRICT_KEY1
+
+-- Dumped from database version 17.6 (Debian 17.6-2.pgdg13+1)
+-- Dumped by pg_dump version 17.6 (Debian 17.6-2.pgdg13+1)
 
 -- Started on [MASKED_TIMESTAMP] UTC
 
@@ -64,7 +66,7 @@ CREATE TABLE public.employees (
 ALTER TABLE public.employees OWNER TO "test-user";
 
 --
--- TOC entry 3364 (class 0 OID 16391)
+-- TOC entry 3428 (class 0 OID 16391)
 -- Dependencies: 219
 -- Data for Name: persons; Type: TABLE DATA; Schema: other_schema; Owner: test-user
 --
@@ -77,7 +79,7 @@ COPY other_schema.persons (id, name) FROM stdin;
 
 
 --
--- TOC entry 3363 (class 0 OID 16385)
+-- TOC entry 3427 (class 0 OID 16385)
 -- Dependencies: 218
 -- Data for Name: employees; Type: TABLE DATA; Schema: public; Owner: test-user
 --
@@ -92,7 +94,7 @@ COPY public.employees (id, first_name, last_name, email, hire_date, salary) FROM
 
 
 --
--- TOC entry 3217 (class 2606 OID 16397)
+-- TOC entry 3281 (class 2606 OID 16397)
 -- Name: persons persons_pkey; Type: CONSTRAINT; Schema: other_schema; Owner: test-user
 --
 
@@ -101,7 +103,7 @@ ALTER TABLE ONLY other_schema.persons
 
 
 --
--- TOC entry 3215 (class 2606 OID 16389)
+-- TOC entry 3279 (class 2606 OID 16389)
 -- Name: employees employees_pkey; Type: CONSTRAINT; Schema: public; Owner: test-user
 --
 
@@ -114,3 +116,5 @@ ALTER TABLE ONLY public.employees
 --
 -- PostgreSQL database dump complete
 --
+
+\unrestrict RESTRICT_KEY1
