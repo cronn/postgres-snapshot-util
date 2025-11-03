@@ -21,6 +21,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import de.cronn.assertions.validationfile.ValidationFileAssertions;
+import de.cronn.assertions.validationfile.normalization.IdNormalizer;
+import de.cronn.assertions.validationfile.normalization.IncrementingIdProvider;
 import de.cronn.assertions.validationfile.normalization.ValidationNormalizer;
 import de.cronn.testutils.ThreadLeakCheck;
 
@@ -43,7 +45,7 @@ import de.cronn.testutils.ThreadLeakCheck;
 })
 abstract class BaseTest {
 
-	private static final DockerImageName POSTGRES_DOCKER_IMAGE = DockerImageName.parse("postgres:17.5");
+	private static final DockerImageName POSTGRES_DOCKER_IMAGE = DockerImageName.parse("postgres:17.6");
 
 	private static final String DATABASE_NAME = "test-db";
 	protected static final String USERNAME = "test-user";
@@ -119,6 +121,10 @@ abstract class BaseTest {
 		}
 	}
 
+	protected static ValidationNormalizer normalizeRestrictKey() {
+		return new IdNormalizer(new IncrementingIdProvider(), "RESTRICT_KEY", "\\\\(?:un)?restrict ([a-zA-Z0-9]{63})");
+	}
+
 	@BeforeEach
 	void prepareValidationFileAssertions(TestInfo testInfo) {
 		validationFileAssertions = new SoftValidationFileAssertions(testInfo);
@@ -128,12 +134,12 @@ abstract class BaseTest {
 		validationFileAssertions.assertWithFile(actual);
 	}
 
-	protected void compareActualWithValidationFile(String actual, String suffix) {
-		validationFileAssertions.assertWithFileWithSuffix(actual, suffix);
+	protected void compareActualWithValidationFile(String actual, ValidationNormalizer validationNormalizer) {
+		compareActualWithValidationFile(actual, validationNormalizer, null);
 	}
 
-	protected void compareActualWithValidationFile(String actual, ValidationNormalizer validationNormalizer) {
-		validationFileAssertions.assertWithFile(actual, validationNormalizer);
+	protected void compareActualWithValidationFile(String actual, ValidationNormalizer validationNormalizer, String suffix) {
+		validationFileAssertions.assertWithFileWithSuffix(actual, validationNormalizer, suffix);
 	}
 
 	private class SoftValidationFileAssertions implements ValidationFileAssertions {
