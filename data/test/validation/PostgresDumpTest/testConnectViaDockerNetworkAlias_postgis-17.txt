@@ -4,8 +4,8 @@
 
 \restrict RESTRICT_KEY1
 
--- Dumped from database version 17.6
--- Dumped by pg_dump version 17.6 (Debian 17.6-2.pgdg13+1)
+-- Dumped from database version 17.7
+-- Dumped by pg_dump version 17.7 (Debian 17.7-3.pgdg13+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -27,15 +27,6 @@ CREATE SCHEMA tiger;
 
 
 ALTER SCHEMA tiger OWNER TO "test-user";
-
---
--- Name: tiger_data; Type: SCHEMA; Schema: -; Owner: test-user
---
-
-CREATE SCHEMA tiger_data;
-
-
-ALTER SCHEMA tiger_data OWNER TO "test-user";
 
 --
 -- Name: topology; Type: SCHEMA; Schema: -; Owner: test-user
