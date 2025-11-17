@@ -16,7 +16,7 @@ plugins {
 }
 
 group = 'de.cronn'
-version = '1.5-SNAPSHOT'
+version = '1.5'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
