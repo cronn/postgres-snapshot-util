@@ -12,6 +12,7 @@ plugins {
     id 'maven-publish'
     id 'jacoco'
     id 'signing'
+    id 'org.jreleaser' version 'latest.release'
 }
 
 group = 'de.cronn'
@@ -158,4 +159,22 @@ publishing {
 signing {
     useGpgCmd()
     sign publishing.publications.mavenJava
+}
+
+jreleaser {
+    signing {
+        active = 'NEVER'
+    }
+    deploy {
+        maven {
+            mavenCentral {
+                sonatype {
+                    active = 'RELEASE'
+                    sign = false
+                    url = 'https://central.sonatype.com/api/v1/publisher'
+                    stagingRepository('build/staging-deploy')
+                }
+            }
+        }
+    }
 }
