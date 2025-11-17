@@ -227,7 +227,7 @@ class PostgresDumpTest extends BaseTest {
 
 	@ParameterizedTest
 	@CsvSource({
-		"vanilla-17, postgres:17.6",
+		"vanilla-17, postgres:17.7",
 		"postgis-17, postgis/postgis:17-3.6-alpine",
 	})
 	void testConnectViaDockerNetworkAlias(String testName, String fullImageName) {
