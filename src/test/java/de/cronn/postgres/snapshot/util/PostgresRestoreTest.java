@@ -10,7 +10,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.testcontainers.containers.ContainerLaunchException;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 class PostgresRestoreTest extends BaseTest {
 
@@ -49,7 +49,7 @@ class PostgresRestoreTest extends BaseTest {
 		Path dumpFile = tempDir.resolve("dump.tar");
 		PostgresDump.dumpToFile(dumpFile, jdbcUrl, USERNAME, PASSWORD, PostgresDumpFormat.CUSTOM);
 
-		try (PostgreSQLContainer<?> otherPostgres = createPostgresContainer()) {
+		try (PostgreSQLContainer otherPostgres = createPostgresContainer()) {
 			otherPostgres.start();
 			String otherPostgresJdbcUrl = otherPostgres.getJdbcUrl();
 
@@ -70,7 +70,7 @@ class PostgresRestoreTest extends BaseTest {
 		Path dumpFile = tempDir.resolve("dump.tar");
 		PostgresDump.dumpToFile(dumpFile, jdbcUrl, USERNAME, PASSWORD, PostgresDumpFormat.TAR);
 
-		try (PostgreSQLContainer<?> otherPostgres = createPostgresContainer()) {
+		try (PostgreSQLContainer otherPostgres = createPostgresContainer()) {
 			otherPostgres.start();
 			String otherPostgresJdbcUrl = otherPostgres.getJdbcUrl();
 
@@ -87,7 +87,7 @@ class PostgresRestoreTest extends BaseTest {
 
 	@Test
 	void testRestoreFromFileThatDoesNotExist() {
-		try (PostgreSQLContainer<?> otherPostgres = createPostgresContainer()) {
+		try (PostgreSQLContainer otherPostgres = createPostgresContainer()) {
 			otherPostgres.start();
 			String otherPostgresJdbcUrl = otherPostgres.getJdbcUrl();
 

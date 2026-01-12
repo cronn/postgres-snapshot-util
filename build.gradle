@@ -56,7 +56,7 @@ dependencies {
     testImplementation 'org.assertj:assertj-core:latest.release'
     testImplementation 'de.cronn:test-utils:latest.release'
     testImplementation 'de.cronn:validation-file-assertions:latest.release'
-    testImplementation 'org.testcontainers:postgresql:latest.release'
+    testImplementation 'org.testcontainers:testcontainers-postgresql:latest.release'
 
     testRuntimeOnly 'ch.qos.logback:logback-classic:latest.release'
 

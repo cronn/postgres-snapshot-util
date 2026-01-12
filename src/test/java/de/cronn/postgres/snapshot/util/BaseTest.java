@@ -17,7 +17,7 @@ import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import de.cronn.assertions.validationfile.ValidationFileAssertions;
@@ -51,7 +51,7 @@ abstract class BaseTest {
 	protected static final String USERNAME = "test-user";
 	protected static final String PASSWORD = "test-password";
 
-	static final PostgreSQLContainer<?> postgresContainer = createPostgresContainer();
+	static final PostgreSQLContainer postgresContainer = createPostgresContainer();
 	static String jdbcUrl;
 
 	@InjectSoftAssertions
@@ -59,12 +59,12 @@ abstract class BaseTest {
 
 	private ValidationFileAssertions validationFileAssertions;
 
-	protected static PostgreSQLContainer<?> createPostgresContainer() {
+	protected static PostgreSQLContainer createPostgresContainer() {
 		return createPostgresContainer(POSTGRES_DOCKER_IMAGE);
 	}
 
-	protected static PostgreSQLContainer<?> createPostgresContainer(DockerImageName postgresDockerImage) {
-		return new PostgreSQLContainer<>(postgresDockerImage)
+	protected static PostgreSQLContainer createPostgresContainer(DockerImageName postgresDockerImage) {
+		return new PostgreSQLContainer(postgresDockerImage)
 			.withDatabaseName(DATABASE_NAME)
 			.withUsername(USERNAME)
 			.withPassword(PASSWORD)

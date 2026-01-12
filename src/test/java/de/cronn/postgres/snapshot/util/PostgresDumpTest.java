@@ -22,8 +22,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.testcontainers.containers.ContainerLaunchException;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import de.cronn.assertions.validationfile.normalization.SimpleRegexReplacement;
@@ -199,7 +199,7 @@ class PostgresDumpTest extends BaseTest {
 
 	@Test
 	void testOtherPostgresVersion() {
-		try (PostgreSQLContainer<?> otherPostgresContainer = createPostgresContainer(DockerImageName.parse("postgres:14.12"))) {
+		try (PostgreSQLContainer otherPostgresContainer = createPostgresContainer(DockerImageName.parse("postgres:14.12"))) {
 			otherPostgresContainer.start();
 			String jdbcUrl = otherPostgresContainer.getJdbcUrl();
 
@@ -212,7 +212,7 @@ class PostgresDumpTest extends BaseTest {
 	void testConnectViaDockerContainerIpAddress() {
 		String networkAlias = "postgres-db";
 		try (Network network = Network.newNetwork();
-			 PostgreSQLContainer<?> postgresInNetworkContainer = createPostgresContainer(DockerImageName.parse("postgres:17.6"))
+			 PostgreSQLContainer postgresInNetworkContainer = createPostgresContainer(DockerImageName.parse("postgres:17.6"))
 				 .withNetwork(network)
 				 .withNetworkAliases(networkAlias)) {
 			postgresInNetworkContainer.start();
@@ -233,7 +233,7 @@ class PostgresDumpTest extends BaseTest {
 	void testConnectViaDockerNetworkAlias(String testName, String fullImageName) {
 		String networkAlias = "postgres-db";
 		try (Network network = Network.newNetwork();
-			 PostgreSQLContainer<?> postgresInNetworkContainer = createPostgresContainer(DockerImageName.parse(fullImageName)
+			 PostgreSQLContainer postgresInNetworkContainer = createPostgresContainer(DockerImageName.parse(fullImageName)
 				 .asCompatibleSubstituteFor("postgres"))
 				 .withNetwork(network)
 				 .withNetworkAliases(networkAlias)) {
