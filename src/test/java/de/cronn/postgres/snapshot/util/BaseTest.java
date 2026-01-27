@@ -36,7 +36,8 @@ import de.cronn.testutils.ThreadLeakCheck;
 		"Attach Listener",
 		"testcontainers-ryuk",
 		"PostgreSQL-JDBC-Cleaner",
-		"JNA Cleaner"
+		"JNA Cleaner",
+		"Cleaner-0"
 	}
 )
 @ExtendWith({
