@@ -73,11 +73,7 @@ abstract class BaseTest {
 	}
 
 	protected static void createSomeTableAndInsertData() {
-		Properties connectionProperties = new Properties();
-		connectionProperties.put("user", USERNAME);
-		connectionProperties.put("password", PASSWORD);
-
-		try (Connection connection = DriverManager.getConnection(jdbcUrl, connectionProperties)) {
+		try (Connection connection = getConnection(jdbcUrl)) {
 			try (PreparedStatement createTableStatement = connection.prepareStatement("""
 				CREATE TABLE employees (
 				    id INT PRIMARY KEY,
@@ -111,9 +107,9 @@ abstract class BaseTest {
 			}
 			try (PreparedStatement insertStatement = connection.prepareStatement("""
 				INSERT INTO other_schema.persons (id, name) VALUES
-				 (1, 'John'),
-				 (2, 'Jane'),
-				 (3, 'Emily')
+				 (1, E'John\\nDoe'),
+				 (2, E'Jane\\nSmith'),
+				 (3, E'Emily\\nJohnson')
 				""")) {
 				insertStatement.execute();
 			}
@@ -124,6 +120,14 @@ abstract class BaseTest {
 
 	protected static ValidationNormalizer normalizeRestrictKey() {
 		return new IdNormalizer(new IncrementingIdProvider(), "RESTRICT_KEY", "\\\\(?:un)?restrict ([a-zA-Z0-9]{63})");
+	}
+
+	protected static Connection getConnection(String jdbcUrl) throws SQLException {
+		Properties connectionProperties = new Properties();
+		connectionProperties.put("user", USERNAME);
+		connectionProperties.put("password", PASSWORD);
+
+		return DriverManager.getConnection(jdbcUrl, connectionProperties);
 	}
 
 	@BeforeEach

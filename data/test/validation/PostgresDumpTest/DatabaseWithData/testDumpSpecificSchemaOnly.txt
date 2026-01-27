@@ -44,9 +44,12 @@ CREATE TABLE other_schema.persons (
 -- Data for Name: persons; Type: TABLE DATA; Schema: other_schema; Owner: -
 --
 
-INSERT INTO other_schema.persons VALUES (1, 'John');
-INSERT INTO other_schema.persons VALUES (2, 'Jane');
-INSERT INTO other_schema.persons VALUES (3, 'Emily');
+INSERT INTO other_schema.persons VALUES (1, 'John
+Doe');
+INSERT INTO other_schema.persons VALUES (2, 'Jane
+Smith');
+INSERT INTO other_schema.persons VALUES (3, 'Emily
+Johnson');
 
 
 --

@@ -8,6 +8,9 @@ import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -194,6 +197,37 @@ class PostgresDumpTest extends BaseTest {
 			String replacedJdbcUrl = jdbcUrl.replaceFirst("localhost:", InetAddress.getLocalHost().getHostName() + ":");
 			String schema = PostgresDump.dumpToString(replacedJdbcUrl, USERNAME, PASSWORD);
 			compareActualWithValidationFile(schema, normalizeRestrictKey());
+		}
+
+		@Test
+		void testDumpAndRestoreWithJdbcStatements() throws Exception {
+			String databaseDump = PostgresDump.dumpToString(jdbcUrl, USERNAME, PASSWORD, PostgresDumpOption.INSERTS);
+
+			try (PostgreSQLContainer otherPostgres = createPostgresContainer()) {
+				otherPostgres.start();
+				String otherPostgresJdbcUrl = otherPostgres.getJdbcUrl();
+
+				try (Connection connection = getConnection(otherPostgresJdbcUrl);
+					 Statement statement = connection.createStatement()) {
+					List<String> statements = Arrays.stream(databaseDump.split("\\r?\\n"))
+						.filter(line -> !line.isBlank())
+						.filter(line -> !line.startsWith("\\restrict"))
+						.filter(line -> !line.startsWith("\\unrestrict"))
+						.filter(line -> !line.trim().startsWith("--"))
+						.toList();
+
+					String filteredStatements = String.join("\n", statements);
+
+					for (String sql : filteredStatements.split(";\\n")) {
+						statement.execute(sql);
+					}
+				}
+
+				String dumpOfRestoredData = PostgresDump.dumpToString(otherPostgresJdbcUrl, USERNAME, PASSWORD, PostgresDumpOption.INSERTS);
+
+				assertThat(normalizeRestrictKey().normalize(dumpOfRestoredData))
+					.isEqualTo(normalizeRestrictKey().normalize(databaseDump));
+			}
 		}
 	}
 
