@@ -24,9 +24,9 @@ SET row_security = off;
 --
 
 COPY other_schema.persons (id, name) FROM stdin;
-1	John
-2	Jane
-3	Emily
+1	John\nDoe
+2	Jane\nSmith
+3	Emily\nJohnson
 \.
 
 
