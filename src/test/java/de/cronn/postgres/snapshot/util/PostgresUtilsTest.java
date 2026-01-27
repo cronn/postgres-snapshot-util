@@ -43,8 +43,8 @@ class PostgresUtilsTest {
 	@Test
 	void testParseConnectionInformation_failToConnectToPostgresDatabase() {
 		assertThatExceptionOfType(RuntimeException.class)
-			.isThrownBy(() -> PostgresUtils.parseConnectionInformation("jdbc:postgresql://localhost/test", "user", "password"))
-			.withMessage("org.postgresql.util.PSQLException: Connection to localhost:5432 refused." +
+			.isThrownBy(() -> PostgresUtils.parseConnectionInformation("jdbc:postgresql://localhost:9988/test", "user", "password"))
+			.withMessage("org.postgresql.util.PSQLException: Connection to localhost:9988 refused." +
 						 " Check that the hostname and port are correct and that the postmaster is accepting TCP/IP connections.");
 	}
 
