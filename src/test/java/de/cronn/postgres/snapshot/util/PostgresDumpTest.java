@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -209,16 +211,12 @@ class PostgresDumpTest extends BaseTest {
 
 				try (Connection connection = getConnection(otherPostgresJdbcUrl);
 					 Statement statement = connection.createStatement()) {
-					List<String> statements = Arrays.stream(databaseDump.split("\\r?\\n"))
-						.filter(line -> !line.isBlank())
+					String filteredDump = Arrays.stream(databaseDump.split("\\r?\\n"))
 						.filter(line -> !line.startsWith("\\restrict"))
 						.filter(line -> !line.startsWith("\\unrestrict"))
-						.filter(line -> !line.trim().startsWith("--"))
-						.toList();
+						.collect(Collectors.joining("\n"));
 
-					String filteredStatements = String.join("\n", statements);
-
-					for (String sql : filteredStatements.split(";\\n")) {
+					for (String sql : filteredDump.split(";\\n")) {
 						statement.execute(sql);
 					}
 				}
