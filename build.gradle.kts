@@ -57,17 +57,19 @@ tasks.jacocoTestReport {
     dependsOn(tasks.test)
 }
 
-val sourcesJar by tasks.registering(Jar::class) {
-    archiveClassifier = "sources"
-    from(sourceSets.main.get().allSource)
-    dependsOn(tasks.classes)
-}
+val sourcesJar =
+    tasks.register<Jar>("sourcesJar") {
+        archiveClassifier = "sources"
+        from(sourceSets.main.get().allSource)
+        dependsOn(tasks.classes)
+    }
 
-val javadocJar by tasks.registering(Jar::class) {
-    archiveClassifier = "javadoc"
-    from(tasks.javadoc.get().destinationDir)
-    dependsOn(tasks.javadoc)
-}
+val javadocJar =
+    tasks.register<Jar>("javadocJar") {
+        archiveClassifier = "javadoc"
+        from(tasks.javadoc.get().destinationDir)
+        dependsOn(tasks.javadoc)
+    }
 
 publishing {
     publications {
