@@ -103,7 +103,7 @@ class SchemaTest implements JUnit5ValidationFileAssertions {
 
 ## Requirements ##
 
-- Java 17+
+- Java 21+
 - [Docker][testcontainers-docker-requirement]
 
 [testcontainers]: https://testcontainers.com/
