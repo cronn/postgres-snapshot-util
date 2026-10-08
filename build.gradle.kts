@@ -46,7 +46,7 @@ dependencyLocking {
 }
 
 tasks.wrapper {
-    gradleVersion = "9.8.0"
+    gradleVersion = "9.8.1"
     distributionType = Wrapper.DistributionType.ALL
 }
 
