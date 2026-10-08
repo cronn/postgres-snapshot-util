@@ -273,7 +273,7 @@ class PostgresDumpTest extends BaseTest {
   @Test
   void testOtherPostgresVersion() {
     try (PostgreSQLContainer otherPostgresContainer =
-        createPostgresContainer(DockerImageName.parse("postgres:14.12"))) {
+        createPostgresContainer(DockerImageName.parse("postgres:14.24"))) {
       otherPostgresContainer.start();
       String jdbcUrl = otherPostgresContainer.getJdbcUrl();
 
@@ -288,7 +288,7 @@ class PostgresDumpTest extends BaseTest {
     String networkAlias = "postgres-db";
     try (Network network = Network.newNetwork();
         PostgreSQLContainer postgresInNetworkContainer =
-            createPostgresContainer(DockerImageName.parse("postgres:17.6"))
+            createPostgresContainer(DockerImageName.parse("postgres:17.11"))
                 .withNetwork(network)
                 .withNetworkAliases(networkAlias)) {
       postgresInNetworkContainer.start();
@@ -303,7 +303,7 @@ class PostgresDumpTest extends BaseTest {
 
   @ParameterizedTest
   @CsvSource({
-    "vanilla-17, postgres:17.7",
+    "vanilla-17, postgres:17.11",
     "postgis-17, postgis/postgis:17-3.6-alpine",
   })
   void testConnectViaDockerNetworkAlias(String testName, String fullImageName) {
