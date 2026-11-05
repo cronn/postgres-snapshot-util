@@ -72,50 +72,54 @@ abstract class BaseTest {
       try (PreparedStatement createTableStatement =
           connection.prepareStatement(
               """
-				CREATE TABLE employees (
-				    id INT PRIMARY KEY,
-				    first_name VARCHAR(50),
-				    last_name VARCHAR(50),
-				    email VARCHAR(100),
-				    hire_date DATE,
-				    salary DECIMAL(10, 2)
-				)""")) {
+              CREATE TABLE employees (
+                  id INT PRIMARY KEY,
+                  first_name VARCHAR(50),
+                  last_name VARCHAR(50),
+                  email VARCHAR(100),
+                  hire_date DATE,
+                  salary DECIMAL(10, 2)
+              )\
+              """)) {
         createTableStatement.execute();
       }
       try (PreparedStatement insertStatement =
           connection.prepareStatement(
               """
-				INSERT INTO employees (id, first_name, last_name, email, hire_date, salary) VALUES
-				 (1, 'John', 'Doe', 'john.doe@example.com', '2022-01-15', 60000.00),
-				 (2, 'Jane', 'Smith', 'jane.smith@example.com', '2023-03-22', 75000.00),
-				 (3, 'Emily', 'Johnson', 'emily.johnson@example.com', '2021-05-10', 50000.00),
-				 (4, 'Michael', 'Brown', 'michael.brown@example.com', '2020-08-30', 80000.00),
-				 (5, 'Sarah', 'Davis', 'sarah.davis@example.com', '2024-06-01', 70000.00);""")) {
+              INSERT INTO employees (id, first_name, last_name, email, hire_date, salary) VALUES
+               (1, 'John', 'Doe', 'john.doe@example.com', '2022-01-15', 60000.00),
+               (2, 'Jane', 'Smith', 'jane.smith@example.com', '2023-03-22', 75000.00),
+               (3, 'Emily', 'Johnson', 'emily.johnson@example.com', '2021-05-10', 50000.00),
+               (4, 'Michael', 'Brown', 'michael.brown@example.com', '2020-08-30', 80000.00),
+               (5, 'Sarah', 'Davis', 'sarah.davis@example.com', '2024-06-01', 70000.00);\
+              """)) {
         insertStatement.execute();
       }
       try (PreparedStatement createSchemaStatement =
           connection.prepareStatement(
               """
-				CREATE SCHEMA other_schema""")) {
+              CREATE SCHEMA other_schema\
+              """)) {
         createSchemaStatement.execute();
       }
       try (PreparedStatement createTableStatement =
           connection.prepareStatement(
               """
-				CREATE TABLE other_schema.persons (
-				    id INT PRIMARY KEY,
-				    name TEXT NOT NULL
-				)""")) {
+              CREATE TABLE other_schema.persons (
+                  id INT PRIMARY KEY,
+                  name TEXT NOT NULL
+              )\
+              """)) {
         createTableStatement.execute();
       }
       try (PreparedStatement insertStatement =
           connection.prepareStatement(
               """
-				INSERT INTO other_schema.persons (id, name) VALUES
-				 (1, E'John\\nDoe'),
-				 (2, E'Jane\\nSmith'),
-				 (3, E'Emily\\nJohnson')
-				""")) {
+              INSERT INTO other_schema.persons (id, name) VALUES
+               (1, E'John\\nDoe'),
+               (2, E'Jane\\nSmith'),
+               (3, E'Emily\\nJohnson')
+              """)) {
         insertStatement.execute();
       }
     } catch (SQLException e) {

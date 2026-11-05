@@ -100,10 +100,9 @@ class PostgresRestoreTest extends BaseTest {
       String otherPostgresJdbcUrl = otherPostgres.getJdbcUrl();
 
       assertThatExceptionOfType(ContainerLaunchException.class)
-          .isThrownBy(
-              () ->
-                  PostgresRestore.restoreFromFile(
-                      Path.of("does-not-exist"), otherPostgresJdbcUrl, USERNAME, PASSWORD))
+          .isThrownBy(() ->
+              PostgresRestore.restoreFromFile(
+                  Path.of("does-not-exist"), otherPostgresJdbcUrl, USERNAME, PASSWORD))
           .withMessageStartingWith("Container startup failed for image postgres:");
     }
   }
