@@ -14,6 +14,7 @@ plugins {
     signing
     id("org.jreleaser") version "latest.release"
     id("com.diffplug.spotless") version "latest.release"
+    id("de.cronn.validation-files") version "latest.release"
 }
 
 group = "de.cronn"
@@ -36,9 +37,6 @@ tasks.withType<JavaCompile> {
 tasks.test {
     useJUnitPlatform()
     maxHeapSize = "256m"
-    inputs.dir("data/test/validation")
-    outputs.dir("data/test/output")
-    outputs.dir("data/test/tmp")
 }
 
 dependencyLocking {
