@@ -323,7 +323,7 @@ class PostgresDumpTest extends BaseTest {
 
   private String resolveHostname(Network network, String hostname) {
     try (GenericContainer<?> dnsContainer =
-        new GenericContainer<>("alpine:3.20.3")
+        new GenericContainer<>("alpine:3.24.3")
             .withNetwork(network)
             .withCommand("getent hosts " + hostname)
             .withStartupCheckStrategy(new OneShotStartupCheckStrategy())) {
