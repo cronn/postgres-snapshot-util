@@ -55,7 +55,7 @@ Consider the following simple `docker-compose.yml` file:
 ```yaml
 services:
   postgres-db:
-    image: postgres:17
+    image: postgres:18
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
@@ -88,7 +88,7 @@ class SchemaTest implements JUnit5ValidationFileAssertions {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17.6");
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18.6");
 
     @Test
     void schemaExport() {

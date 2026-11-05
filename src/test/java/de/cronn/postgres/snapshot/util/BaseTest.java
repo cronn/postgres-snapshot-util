@@ -41,7 +41,7 @@ import org.testcontainers.utility.DockerImageName;
 abstract class BaseTest {
 
   private static final DockerImageName POSTGRES_DOCKER_IMAGE =
-      DockerImageName.parse("postgres:17.11");
+      DockerImageName.parse("postgres:18.6");
 
   private static final String DATABASE_NAME = "test-db";
   protected static final String USERNAME = "test-user";
@@ -64,7 +64,7 @@ abstract class BaseTest {
         .withDatabaseName(DATABASE_NAME)
         .withUsername(USERNAME)
         .withPassword(PASSWORD)
-        .withTmpFs(Map.of("/var/lib/postgresql/data", "rw"));
+        .withTmpFs(Map.of("/var/lib/postgresql", "rw"));
   }
 
   protected static void createSomeTableAndInsertData() {
