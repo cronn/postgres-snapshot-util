@@ -194,14 +194,13 @@ class PostgresDumpTest extends BaseTest {
     @Test
     void testDumpWithIllegalParameters() {
       assertThatExceptionOfType(ContainerLaunchException.class)
-          .isThrownBy(
-              () ->
-                  PostgresDump.dumpToString(
-                      jdbcUrl,
-                      USERNAME,
-                      PASSWORD,
-                      PostgresDumpOption.SCHEMA_ONLY,
-                      PostgresDumpOption.DATA_ONLY))
+          .isThrownBy(() ->
+              PostgresDump.dumpToString(
+                  jdbcUrl,
+                  USERNAME,
+                  PASSWORD,
+                  PostgresDumpOption.SCHEMA_ONLY,
+                  PostgresDumpOption.DATA_ONLY))
           .withMessageStartingWith("Container startup failed for image postgres:");
     }
 

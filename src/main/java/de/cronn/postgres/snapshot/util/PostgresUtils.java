@@ -129,27 +129,26 @@ final class PostgresUtils {
     DockerClient client = DockerClientFactory.instance().client();
 
     return client.listContainersCmd().exec().stream()
-        .map(
-            container -> {
-              try {
-                InspectContainerResponse inspectContainerResponse =
-                    client.inspectContainerCmd(container.getId()).exec();
-                for (ContainerNetwork network :
-                    inspectContainerResponse.getNetworkSettings().getNetworks().values()) {
-                  if (network.getAliases() != null && network.getAliases().contains(host)) {
-                    log.debug(
-                        "Found Docker container {} with network {}",
-                        String.join(", ", container.getNames()),
-                        network.getNetworkID());
-                    return new ContainerAndNetwork(inspectContainerResponse, network);
-                  }
-                }
-                return null;
-              } catch (NotFoundException e) {
-                log.debug("Docker container '{}' seems to be gone", container.getId(), e);
-                return null;
+        .map(container -> {
+          try {
+            InspectContainerResponse inspectContainerResponse =
+                client.inspectContainerCmd(container.getId()).exec();
+            for (ContainerNetwork network :
+                inspectContainerResponse.getNetworkSettings().getNetworks().values()) {
+              if (network.getAliases() != null && network.getAliases().contains(host)) {
+                log.debug(
+                    "Found Docker container {} with network {}",
+                    String.join(", ", container.getNames()),
+                    network.getNetworkID());
+                return new ContainerAndNetwork(inspectContainerResponse, network);
               }
-            })
+            }
+            return null;
+          } catch (NotFoundException e) {
+            log.debug("Docker container '{}' seems to be gone", container.getId(), e);
+            return null;
+          }
+        })
         .filter(Objects::nonNull)
         .findFirst()
         .orElse(null);

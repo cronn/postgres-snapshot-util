@@ -23,30 +23,27 @@ class PostgresUtilsTest {
   @Test
   void testParseConnectionInformation_unknownHost() {
     assertThatExceptionOfType(RuntimeException.class)
-        .isThrownBy(
-            () ->
-                PostgresUtils.parseConnectionInformation(
-                    "jdbc:postgresql://unknown-host/test", "user", "password"))
+        .isThrownBy(() ->
+            PostgresUtils.parseConnectionInformation(
+                "jdbc:postgresql://unknown-host/test", "user", "password"))
         .withMessage("org.postgresql.util.PSQLException: The connection attempt failed.");
   }
 
   @Test
   void testParseConnectionInformation_failsToConnect() {
     assertThatExceptionOfType(RuntimeException.class)
-        .isThrownBy(
-            () ->
-                PostgresUtils.parseConnectionInformation(
-                    "jdbc:postgresql://10.0.0.1/test?connectTimeout=1", "user", "password"))
+        .isThrownBy(() ->
+            PostgresUtils.parseConnectionInformation(
+                "jdbc:postgresql://10.0.0.1/test?connectTimeout=1", "user", "password"))
         .withMessage("org.postgresql.util.PSQLException: The connection attempt failed.");
   }
 
   @Test
   void testParseConnectionInformation_driverFailsToParseJdbcUrl() {
     assertThatExceptionOfType(RuntimeException.class)
-        .isThrownBy(
-            () ->
-                PostgresUtils.parseConnectionInformation(
-                    "jdbc:postgresql://localhost", "user", "password"))
+        .isThrownBy(() ->
+            PostgresUtils.parseConnectionInformation(
+                "jdbc:postgresql://localhost", "user", "password"))
         .withMessage(
             "org.postgresql.util.PSQLException: Unable to parse URL jdbc:postgresql://localhost");
   }
@@ -54,10 +51,9 @@ class PostgresUtilsTest {
   @Test
   void testParseConnectionInformation_failToConnectToPostgresDatabase() {
     assertThatExceptionOfType(RuntimeException.class)
-        .isThrownBy(
-            () ->
-                PostgresUtils.parseConnectionInformation(
-                    "jdbc:postgresql://localhost:9988/test", "user", "password"))
+        .isThrownBy(() ->
+            PostgresUtils.parseConnectionInformation(
+                "jdbc:postgresql://localhost:9988/test", "user", "password"))
         .withMessage(
             "org.postgresql.util.PSQLException: Connection to localhost:9988 refused."
                 + " Check that the hostname and port are correct and that the postmaster is accepting TCP/IP connections.");
